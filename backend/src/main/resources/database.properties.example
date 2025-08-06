@@ -1,0 +1,17 @@
+# Database Configuration Template for RAF Event Booker
+# Copy this file to 'database.properties' and update with your actual database credentials
+# DO NOT commit database.properties to git!
+
+# Database Connection Settings
+db.host=localhost
+db.port=3306
+db.name=raf_event_booker
+db.username=root
+db.password=your_password_here
+
+# Example:
+# db.host=localhost
+# db.port=3306
+# db.name=raf_event_booker
+# db.username=root
+# db.password=mySecretPassword
