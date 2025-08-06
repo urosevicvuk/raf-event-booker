@@ -1,5 +1,7 @@
 package rs.raf.demo.repositories.subject;
 
+import rs.raf.demo.entities.Subject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

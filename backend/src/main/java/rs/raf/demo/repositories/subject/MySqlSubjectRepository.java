@@ -1,5 +1,6 @@
 package rs.raf.demo.repositories.subject;
 
+import rs.raf.demo.entities.Subject;
 import rs.raf.demo.repositories.MySqlAbstractRepository;
 
 import java.sql.*;
