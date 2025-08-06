@@ -1,5 +1,6 @@
 package rs.raf.demo.services;
 
+import rs.raf.demo.entities.Subject;
 import rs.raf.demo.repositories.subject.SubjectRepository;
 
 import javax.inject.Inject;
