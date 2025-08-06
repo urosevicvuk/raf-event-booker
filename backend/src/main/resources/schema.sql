@@ -43,7 +43,7 @@ CREATE TABLE event (
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    event_date TIMESTAMP NOT NULL,
+    event_date TIMESTAMP NULL,
     location VARCHAR(255) NOT NULL,
     views INT DEFAULT 0,
     like_count INT DEFAULT 0,
