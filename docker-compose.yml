@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  database:
+    image: mysql:8.0
+    container_name: REB-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: raf-event-booker
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./backend/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  # Java Backend (Tomcat on port 8081)
+  backend:
+    build: ./backend
+    container_name: REB-backend
+    ports:
+      - "8081:8081"
+    depends_on:
+      - database
+
+  # React Frontend (Vite on port 5173)
+  frontend:
+    build: ./frontend
+    container_name: REB-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:
