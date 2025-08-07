@@ -107,16 +107,16 @@ VALUES ('admin@raf.rs', 'Admin', 'User', 'admin', 'active', '$2a$10$Xl0yhvzLIaJC
 
 -- Insert some sample categories
 INSERT INTO category (name, description) VALUES 
-('Koncerti', 'Muzički događaji, koncerti i festivali'),
+('Koncerti', 'Muzicki dogadjaji, koncerti i festivali'),
 ('Konferencije', 'Poslovne konferencije, seminari i predavanja'),
 ('Radionice', 'Edukativne radionice i kursevi'),
-('Sport', 'Sportski događaji i takmičenja'),
-('Kultura', 'Kulturni događaji, izložbe i predstave');
+('Sport', 'Sportski dogadjaji i takmicenja'),
+('Kultura', 'Kulturni dogadjaji, izlozbe i predstave');
 
 -- Insert some sample tags
 INSERT INTO tag (name) VALUES 
 ('muzika'), ('rock'), ('pop'), ('jazz'), ('elektronska'),
 ('IT'), ('startup'), ('networking'), ('edukacija'), ('poslovanje'),
 ('fotografija'), ('kuvanje'), ('umetnost'), ('dizajn'), ('programiranje'),
-('fudbal'), ('košarka'), ('tenis'), ('trčanje'), ('fitness'),
-('teatar'), ('film'), ('književnost'), ('istorija'), ('nauka');
+('fudbal'), ('kosarka'), ('tenis'), ('trcanje'), ('fitness'),
+('teatar'), ('film'), ('knjizevnost'), ('istorija'), ('nauka');
