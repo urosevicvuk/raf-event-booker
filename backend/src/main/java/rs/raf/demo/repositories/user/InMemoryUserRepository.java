@@ -16,16 +16,52 @@ public class InMemoryUserRepository implements UserRepository {
     //}
 
     @Override
-    public User findUser(String username) {
-        User user = null;
-        Iterator<User> userIterator = USERS.iterator();
-        while (userIterator.hasNext() && user == null) {
-            User u = userIterator.next();
-            if (u.getEmail().equals(username)) {
-                user = u;
-            }
-        }
+    public User addUser(User user) {
+        return null;
+    }
 
-        return user;
+    @Override
+    public List<User> allUsers() {
+        return List.of();
+    }
+
+    @Override
+    public User findUser(Integer id) {
+        return null;
+    }
+
+    @Override
+    public User findUserByEmail(String email) {
+        return null;
+    }
+
+    @Override
+    public User updateUser(User user) {
+        return null;
+    }
+
+    @Override
+    public void deleteUser(Integer id) {
+
+    }
+
+    @Override
+    public boolean existsById(Integer id) {
+        return false;
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return false;
+    }
+
+    @Override
+    public List<User> findActiveUsers() {
+        return List.of();
+    }
+
+    @Override
+    public List<User> findUsersByType(String userType) {
+        return List.of();
     }
 }

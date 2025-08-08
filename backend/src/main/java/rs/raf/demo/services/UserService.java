@@ -10,6 +10,7 @@ import rs.raf.demo.repositories.user.UserRepository;
 
 import javax.inject.Inject;
 import java.util.Date;
+import java.util.List;
 
 public class UserService {
 
@@ -20,7 +21,7 @@ public class UserService {
     {
         String hashedPassword = DigestUtils.sha256Hex(password);
 
-        User user = this.userRepository.findUser(username);
+        User user = this.userRepository.findUserByEmail(username);
         if (user == null || !user.getHashedPassword().equals(hashedPassword)) {
             return null;
         }
@@ -49,12 +50,62 @@ public class UserService {
         String username = jwt.getSubject();
 //        jwt.getClaim("role").asString();
 
-        User user = this.userRepository.findUser(username);
+        User user = this.userRepository.findUserByEmail(username);
 
         if (user == null){
             return false;
         }
 
         return true;
+    }
+
+    public User addUser(User user) {
+        // Hash the password before saving
+        if (user.getHashedPassword() != null) {
+            user.setHashedPassword(DigestUtils.sha256Hex(user.getHashedPassword()));
+        }
+        return this.userRepository.addUser(user);
+    }
+
+    public List<User> allUsers() {
+        return this.userRepository.allUsers();
+    }
+
+    public User findUser(Integer id) {
+        return this.userRepository.findUser(id);
+    }
+
+    public User findUserByEmail(String email) {
+        return this.userRepository.findUserByEmail(email);
+    }
+
+    public User updateUser(User user) {
+        return this.userRepository.updateUser(user);
+    }
+
+    public void deleteUser(Integer id) {
+        this.userRepository.deleteUser(id);
+    }
+
+    public boolean existsById(Integer id) {
+        return this.userRepository.existsById(id);
+    }
+
+    public boolean existsByEmail(String email) {
+        return this.userRepository.existsByEmail(email);
+    }
+
+    public List<User> findActiveUsers() {
+        // Simple implementation using basic methods
+        return this.userRepository.allUsers().stream()
+                .filter(user -> "active".equals(user.getStatus()))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public List<User> findUsersByType(String userType) {
+        // Simple implementation using basic methods
+        return this.userRepository.allUsers().stream()
+                .filter(user -> userType.equals(user.getUserType()))
+                .collect(java.util.stream.Collectors.toList());
     }
 }

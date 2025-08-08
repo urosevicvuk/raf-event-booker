@@ -1,6 +1,6 @@
-package rs.raf.demo.repositories.comment;
+package rs.raf.demo.repositories.rsvp;
 
-import rs.raf.demo.entities.Comment;
+import rs.raf.demo.entities.RSVP;
 import rs.raf.demo.repositories.MySqlAbstractRepository;
 
 import java.sql.*;
@@ -8,10 +8,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MySqlCommentRepository extends MySqlAbstractRepository implements CommentRepository {
+public class MySqlRSVPRepository extends MySqlAbstractRepository implements RSVPRepository {
 
     @Override
-    public Comment addComment(Comment comment) {
+    public RSVP addRSVP(RSVP rsvp) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -21,20 +21,17 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
             String[] generatedColumns = {"id"};
 
             preparedStatement = connection.prepareStatement(
-                "INSERT INTO comment (author_name, text, created_at, event_id, like_count, dislike_count) VALUES(?, ?, ?, ?, ?, ?)", 
+                "INSERT INTO rsvp (user_identifier, event_id, registration_date) VALUES(?, ?, ?)", 
                 generatedColumns
             );
-            preparedStatement.setString(1, comment.getAuthorName());
-            preparedStatement.setString(2, comment.getText());
-            preparedStatement.setTimestamp(3, Timestamp.valueOf(comment.getCreatedAt()));
-            preparedStatement.setInt(4, comment.getEventId());
-            preparedStatement.setInt(5, comment.getLikeCount());
-            preparedStatement.setInt(6, comment.getDislikeCount());
+            preparedStatement.setString(1, rsvp.getUserIdentifier());
+            preparedStatement.setInt(2, rsvp.getEventId());
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(rsvp.getRegistrationDate()));
             preparedStatement.executeUpdate();
             resultSet = preparedStatement.getGeneratedKeys();
 
             if (resultSet.next()) {
-                comment.setId(resultSet.getInt(1));
+                rsvp.setId(resultSet.getInt(1));
             }
 
         } catch (SQLException e) {
@@ -45,12 +42,12 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
             this.closeConnection(connection);
         }
 
-        return comment;
+        return rsvp;
     }
 
     @Override
-    public List<Comment> allComments() {
-        List<Comment> comments = new ArrayList<>();
+    public List<RSVP> allRSVPs() {
+        List<RSVP> rsvps = new ArrayList<>();
 
         Connection connection = null;
         Statement statement = null;
@@ -59,9 +56,9 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
             connection = this.newConnection();
 
             statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM comment ORDER BY created_at DESC");
+            resultSet = statement.executeQuery("SELECT * FROM rsvp ORDER BY registration_date DESC");
             while (resultSet.next()) {
-                comments.add(mapResultSetToComment(resultSet));
+                rsvps.add(mapResultSetToRSVP(resultSet));
             }
 
         } catch (Exception e) {
@@ -72,12 +69,12 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
             this.closeConnection(connection);
         }
 
-        return comments;
+        return rsvps;
     }
 
     @Override
-    public Comment findComment(Integer id) {
-        Comment comment = null;
+    public RSVP findRSVP(Integer id) {
+        RSVP rsvp = null;
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -85,12 +82,12 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
         try {
             connection = this.newConnection();
 
-            preparedStatement = connection.prepareStatement("SELECT * FROM comment WHERE id = ?");
+            preparedStatement = connection.prepareStatement("SELECT * FROM rsvp WHERE id = ?");
             preparedStatement.setInt(1, id);
             resultSet = preparedStatement.executeQuery();
 
             if(resultSet.next()) {
-                comment = mapResultSetToComment(resultSet);
+                rsvp = mapResultSetToRSVP(resultSet);
             }
 
         } catch (SQLException e) {
@@ -101,12 +98,12 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
             this.closeConnection(connection);
         }
 
-        return comment;
+        return rsvp;
     }
 
     @Override
-    public List<Comment> findCommentsByEventId(Integer eventId) {
-        List<Comment> comments = new ArrayList<>();
+    public List<RSVP> findRSVPsByEventId(Integer eventId) {
+        List<RSVP> rsvps = new ArrayList<>();
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -114,12 +111,12 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
         try {
             connection = this.newConnection();
 
-            preparedStatement = connection.prepareStatement("SELECT * FROM comment WHERE event_id = ? ORDER BY created_at DESC");
+            preparedStatement = connection.prepareStatement("SELECT * FROM rsvp WHERE event_id = ? ORDER BY registration_date");
             preparedStatement.setInt(1, eventId);
             resultSet = preparedStatement.executeQuery();
             
             while (resultSet.next()) {
-                comments.add(mapResultSetToComment(resultSet));
+                rsvps.add(mapResultSetToRSVP(resultSet));
             }
 
         } catch (Exception e) {
@@ -130,13 +127,12 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
             this.closeConnection(connection);
         }
 
-        return comments;
+        return rsvps;
     }
 
     @Override
-    public List<Comment> findCommentsByEventId(Integer eventId, int page, int limit) {
-        List<Comment> comments = new ArrayList<>();
-        int offset = (page - 1) * limit;
+    public List<RSVP> findRSVPsByUserIdentifier(String userIdentifier) {
+        List<RSVP> rsvps = new ArrayList<>();
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -144,16 +140,12 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
         try {
             connection = this.newConnection();
 
-            preparedStatement = connection.prepareStatement(
-                "SELECT * FROM comment WHERE event_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?"
-            );
-            preparedStatement.setInt(1, eventId);
-            preparedStatement.setInt(2, limit);
-            preparedStatement.setInt(3, offset);
+            preparedStatement = connection.prepareStatement("SELECT * FROM rsvp WHERE user_identifier = ? ORDER BY registration_date DESC");
+            preparedStatement.setString(1, userIdentifier);
             resultSet = preparedStatement.executeQuery();
             
             while (resultSet.next()) {
-                comments.add(mapResultSetToComment(resultSet));
+                rsvps.add(mapResultSetToRSVP(resultSet));
             }
 
         } catch (Exception e) {
@@ -164,44 +156,47 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
             this.closeConnection(connection);
         }
 
-        return comments;
+        return rsvps;
     }
 
     @Override
-    public Comment updateComment(Comment comment) {
+    public RSVP findRSVPByEventAndUser(Integer eventId, String userIdentifier) {
+        RSVP rsvp = null;
+
         Connection connection = null;
         PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
         try {
             connection = this.newConnection();
 
-            preparedStatement = connection.prepareStatement(
-                "UPDATE comment SET author_name = ?, text = ?, like_count = ?, dislike_count = ? WHERE id = ?"
-            );
-            preparedStatement.setString(1, comment.getAuthorName());
-            preparedStatement.setString(2, comment.getText());
-            preparedStatement.setInt(3, comment.getLikeCount());
-            preparedStatement.setInt(4, comment.getDislikeCount());
-            preparedStatement.setInt(5, comment.getId());
-            preparedStatement.executeUpdate();
+            preparedStatement = connection.prepareStatement("SELECT * FROM rsvp WHERE event_id = ? AND user_identifier = ?");
+            preparedStatement.setInt(1, eventId);
+            preparedStatement.setString(2, userIdentifier);
+            resultSet = preparedStatement.executeQuery();
+
+            if(resultSet.next()) {
+                rsvp = mapResultSetToRSVP(resultSet);
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             this.closeStatement(preparedStatement);
+            this.closeResultSet(resultSet);
             this.closeConnection(connection);
         }
 
-        return comment;
+        return rsvp;
     }
 
     @Override
-    public void deleteComment(Integer id) {
+    public void deleteRSVP(Integer id) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         try {
             connection = this.newConnection();
 
-            preparedStatement = connection.prepareStatement("DELETE FROM comment WHERE id = ?");
+            preparedStatement = connection.prepareStatement("DELETE FROM rsvp WHERE id = ?");
             preparedStatement.setInt(1, id);
             preparedStatement.executeUpdate();
 
@@ -214,13 +209,33 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
     }
 
     @Override
-    public void deleteCommentsByEventId(Integer eventId) {
+    public void deleteRSVP(Integer eventId, String userIdentifier) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         try {
             connection = this.newConnection();
 
-            preparedStatement = connection.prepareStatement("DELETE FROM comment WHERE event_id = ?");
+            preparedStatement = connection.prepareStatement("DELETE FROM rsvp WHERE event_id = ? AND user_identifier = ?");
+            preparedStatement.setInt(1, eventId);
+            preparedStatement.setString(2, userIdentifier);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeStatement(preparedStatement);
+            this.closeConnection(connection);
+        }
+    }
+
+    @Override
+    public void deleteRSVPsByEventId(Integer eventId) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = this.newConnection();
+
+            preparedStatement = connection.prepareStatement("DELETE FROM rsvp WHERE event_id = ?");
             preparedStatement.setInt(1, eventId);
             preparedStatement.executeUpdate();
 
@@ -241,7 +256,7 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
         try {
             connection = this.newConnection();
 
-            preparedStatement = connection.prepareStatement("SELECT 1 FROM comment WHERE id = ?");
+            preparedStatement = connection.prepareStatement("SELECT 1 FROM rsvp WHERE id = ?");
             preparedStatement.setInt(1, id);
             resultSet = preparedStatement.executeQuery();
 
@@ -259,7 +274,34 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
     }
 
     @Override
-    public long countCommentsByEventId(Integer eventId) {
+    public boolean existsByEventAndUser(Integer eventId, String userIdentifier) {
+        boolean exists = false;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = this.newConnection();
+
+            preparedStatement = connection.prepareStatement("SELECT 1 FROM rsvp WHERE event_id = ? AND user_identifier = ?");
+            preparedStatement.setInt(1, eventId);
+            preparedStatement.setString(2, userIdentifier);
+            resultSet = preparedStatement.executeQuery();
+
+            exists = resultSet.next();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeStatement(preparedStatement);
+            this.closeResultSet(resultSet);
+            this.closeConnection(connection);
+        }
+
+        return exists;
+    }
+
+    @Override
+    public long countRSVPsByEventId(Integer eventId) {
         long count = 0;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -267,7 +309,7 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
         try {
             connection = this.newConnection();
 
-            preparedStatement = connection.prepareStatement("SELECT COUNT(*) FROM comment WHERE event_id = ?");
+            preparedStatement = connection.prepareStatement("SELECT COUNT(*) FROM rsvp WHERE event_id = ?");
             preparedStatement.setInt(1, eventId);
             resultSet = preparedStatement.executeQuery();
 
@@ -286,17 +328,14 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
         return count;
     }
 
-    private Comment mapResultSetToComment(ResultSet resultSet) throws SQLException {
-        LocalDateTime createdAt = resultSet.getTimestamp("created_at").toLocalDateTime();
+    private RSVP mapResultSetToRSVP(ResultSet resultSet) throws SQLException {
+        LocalDateTime registrationDate = resultSet.getTimestamp("registration_date").toLocalDateTime();
         
-        return new Comment(
+        return new RSVP(
             resultSet.getInt("id"),
-            resultSet.getString("author_name"),
-            resultSet.getString("text"),
-            createdAt,
+            resultSet.getString("user_identifier"),
             resultSet.getInt("event_id"),
-            resultSet.getInt("like_count"),
-            resultSet.getInt("dislike_count")
+            registrationDate
         );
     }
 }
