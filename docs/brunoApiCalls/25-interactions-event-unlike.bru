@@ -1,0 +1,25 @@
+meta {
+  name: Interactions - Unlike Event (Toggle Off)
+  type: http
+  seq: 25
+}
+
+post {
+  url: http://localhost:8081/api/events/1/like
+  body: none
+  auth: none
+}
+
+tests {
+  test("Unlike should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Should confirm like was removed", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('message');
+    expect(responseJson).to.have.property('action');
+    expect(responseJson.message).to.equal('Like removed');
+    expect(responseJson.action).to.equal('unliked');
+  });
+}

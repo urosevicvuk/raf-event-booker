@@ -1,0 +1,34 @@
+meta {
+  name: Comments - Get Comments with Pagination
+  type: http
+  seq: 19
+}
+
+get {
+  url: http://localhost:8081/api/comments/event/1/paginated?page=1&limit=5
+  body: none
+  auth: none
+}
+
+tests {
+  test("Paginated comments should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Response should have pagination structure", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('comments');
+    expect(responseJson).to.have.property('page');
+    expect(responseJson).to.have.property('limit');
+    expect(responseJson).to.have.property('eventId');
+    expect(responseJson.page).to.equal(1);
+    expect(responseJson.limit).to.equal(5);
+    expect(responseJson.eventId).to.equal(1);
+  });
+
+  test("Comments array should not exceed limit", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.comments).to.be.an('array');
+    expect(responseJson.comments.length).to.be.at.most(5);
+  });
+}

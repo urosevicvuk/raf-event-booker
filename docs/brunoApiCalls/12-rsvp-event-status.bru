@@ -1,0 +1,49 @@
+meta {
+  name: RSVP - Get Event Registration Status
+  type: http
+  seq: 12
+}
+
+get {
+  url: http://localhost:8081/api/rsvp/event/1/status
+  body: none
+  auth: none
+}
+
+tests {
+  test("RSVP event status should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Response should have RSVP status structure", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('eventId');
+    expect(responseJson).to.have.property('currentCount');
+    expect(responseJson).to.have.property('maxCapacity');
+    expect(responseJson).to.have.property('isFullyBooked');
+    expect(responseJson).to.have.property('hasCapacityLimit');
+    expect(responseJson.eventId).to.equal(1);
+  });
+
+  test("Current count should be non-negative", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.currentCount).to.be.at.least(0);
+  });
+
+  test("Fully booked logic should be correct", function() {
+    const responseJson = res.getBody();
+    if (responseJson.maxCapacity !== null && responseJson.maxCapacity > 0) {
+      const expectedFullyBooked = responseJson.currentCount >= responseJson.maxCapacity;
+      expect(responseJson.isFullyBooked).to.equal(expectedFullyBooked);
+      expect(responseJson.hasCapacityLimit).to.be.true;
+    } else {
+      expect(responseJson.isFullyBooked).to.be.false;
+      expect(responseJson.hasCapacityLimit).to.be.false;
+    }
+  });
+}
+
+vars:post-response {
+  eventMaxCapacity: res.body.maxCapacity
+  eventCurrentCount: res.body.currentCount
+}

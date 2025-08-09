@@ -1,0 +1,38 @@
+meta {
+  name: Events - Latest Events (Homepage)
+  type: http
+  seq: 7
+}
+
+get {
+  url: http://localhost:8081/api/events/latest?limit=10
+  body: none
+  auth: none
+}
+
+tests {
+  test("Latest events should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Response should be an array", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.be.an('array');
+  });
+
+  test("Should not exceed limit", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.length).to.be.at.most(10);
+  });
+
+  test("Events should be sorted by creation date (newest first)", function() {
+    const responseJson = res.getBody();
+    if (responseJson.length > 1) {
+      for (let i = 0; i < responseJson.length - 1; i++) {
+        const current = new Date(responseJson[i].createdAt);
+        const next = new Date(responseJson[i + 1].createdAt);
+        expect(current.getTime()).to.be.at.least(next.getTime());
+      }
+    }
+  });
+}

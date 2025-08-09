@@ -1,0 +1,34 @@
+meta {
+  name: RSVP - Duplicate Registration Attempt
+  type: http
+  seq: 14
+}
+
+post {
+  url: http://localhost:8081/api/rsvp
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "userIdentifier": "testuser@example.com",
+    "eventId": 1
+  }
+}
+
+tests {
+  test("Duplicate registration should return 409 Conflict", function() {
+    expect(res.getStatus()).to.equal(409);
+  });
+
+  test("Should return appropriate error message", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('message');
+    expect(responseJson.message).to.equal('User is already registered for this event');
+  });
+}

@@ -1,0 +1,38 @@
+meta {
+  name: Events - Most Reacted Events (Sidebar)
+  type: http
+  seq: 9
+}
+
+get {
+  url: http://localhost:8081/api/events/most-reacted?limit=3
+  body: none
+  auth: none
+}
+
+tests {
+  test("Most reacted events should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Response should be an array", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.be.an('array');
+  });
+
+  test("Should not exceed limit of 3", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.length).to.be.at.most(3);
+  });
+
+  test("Events should be sorted by total reactions (highest first)", function() {
+    const responseJson = res.getBody();
+    if (responseJson.length > 1) {
+      for (let i = 0; i < responseJson.length - 1; i++) {
+        const currentReactions = responseJson[i].likeCount + responseJson[i].dislikeCount;
+        const nextReactions = responseJson[i + 1].likeCount + responseJson[i + 1].dislikeCount;
+        expect(currentReactions).to.be.at.least(nextReactions);
+      }
+    }
+  });
+}

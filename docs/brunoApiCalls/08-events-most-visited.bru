@@ -1,0 +1,36 @@
+meta {
+  name: Events - Most Visited Events
+  type: http
+  seq: 8
+}
+
+get {
+  url: http://localhost:8081/api/events/most-visited?limit=10
+  body: none
+  auth: none
+}
+
+tests {
+  test("Most visited events should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Response should be an array", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.be.an('array');
+  });
+
+  test("Should not exceed limit", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.length).to.be.at.most(10);
+  });
+
+  test("Events should be sorted by views (highest first)", function() {
+    const responseJson = res.getBody();
+    if (responseJson.length > 1) {
+      for (let i = 0; i < responseJson.length - 1; i++) {
+        expect(responseJson[i].views).to.be.at.least(responseJson[i + 1].views);
+      }
+    }
+  });
+}

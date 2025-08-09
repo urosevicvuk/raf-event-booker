@@ -1,0 +1,23 @@
+meta {
+  name: Interactions - Invalid Event ID Tests
+  type: http
+  seq: 29
+}
+
+post {
+  url: http://localhost:8081/api/events/99999/like
+  body: none
+  auth: none
+}
+
+tests {
+  test("Like non-existent event should return 404", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+
+  test("Should return appropriate error message", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('message');
+    expect(responseJson.message).to.equal('Event not found');
+  });
+}

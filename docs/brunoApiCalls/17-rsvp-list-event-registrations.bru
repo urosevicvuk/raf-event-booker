@@ -1,0 +1,46 @@
+meta {
+  name: RSVP - List Event Registrations
+  type: http
+  seq: 17
+}
+
+get {
+  url: http://localhost:8081/api/rsvp/event/1?page=1&limit=20
+  body: none
+  auth: none
+}
+
+tests {
+  test("Event registrations list should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Response should have proper pagination structure", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('rsvps');
+    expect(responseJson).to.have.property('eventId');
+    expect(responseJson).to.have.property('page');
+    expect(responseJson).to.have.property('limit');
+    expect(responseJson.eventId).to.equal(1);
+    expect(responseJson.page).to.equal(1);
+    expect(responseJson.limit).to.equal(20);
+  });
+
+  test("RSVP entries should have correct structure", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.rsvps).to.be.an('array');
+    
+    responseJson.rsvps.forEach(rsvp => {
+      expect(rsvp).to.have.property('id');
+      expect(rsvp).to.have.property('userIdentifier');
+      expect(rsvp).to.have.property('eventId');
+      expect(rsvp).to.have.property('registrationDate');
+      expect(rsvp.eventId).to.equal(1);
+    });
+  });
+
+  test("Should respect pagination limit", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.rsvps.length).to.be.at.most(20);
+  });
+}

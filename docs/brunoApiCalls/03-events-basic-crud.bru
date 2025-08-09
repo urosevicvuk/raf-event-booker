@@ -1,0 +1,41 @@
+meta {
+  name: Events - Basic CRUD Operations
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://localhost:8081/api/events
+  body: none
+  auth: none
+}
+
+tests {
+  test("Get all events should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Response should be an array", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.be.an('array');
+  });
+
+  test("Events should have required properties", function() {
+    const responseJson = res.getBody();
+    if (responseJson.length > 0) {
+      const event = responseJson[0];
+      expect(event).to.have.property('id');
+      expect(event).to.have.property('title');
+      expect(event).to.have.property('description');
+      expect(event).to.have.property('eventDate');
+      expect(event).to.have.property('location');
+      expect(event).to.have.property('views');
+      expect(event).to.have.property('likeCount');
+      expect(event).to.have.property('dislikeCount');
+    }
+  });
+}
+
+vars:post-response {
+  firstEventId: res.body.length > 0 ? res.body[0].id : null
+}

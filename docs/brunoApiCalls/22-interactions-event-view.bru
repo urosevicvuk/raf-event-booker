@@ -1,0 +1,23 @@
+meta {
+  name: Interactions - Event View Tracking (Session-based)
+  type: http
+  seq: 22
+}
+
+post {
+  url: http://localhost:8081/api/events/1/view
+  body: none
+  auth: none
+}
+
+tests {
+  test("First view should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Should confirm view was counted", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('message');
+    expect(responseJson.message).to.equal('View counted');
+  });
+}

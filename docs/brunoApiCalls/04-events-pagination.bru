@@ -1,0 +1,32 @@
+meta {
+  name: Events - Pagination Test
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:8081/api/events/paginated?page=1&limit=5
+  body: none
+  auth: none
+}
+
+tests {
+  test("Paginated events should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Response should have pagination structure", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('events');
+    expect(responseJson).to.have.property('page');
+    expect(responseJson).to.have.property('limit');
+    expect(responseJson.page).to.equal(1);
+    expect(responseJson.limit).to.equal(5);
+  });
+
+  test("Events array should not exceed limit", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.events).to.be.an('array');
+    expect(responseJson.events.length).to.be.at.most(5);
+  });
+}

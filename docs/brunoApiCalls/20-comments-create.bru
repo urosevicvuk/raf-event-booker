@@ -1,0 +1,53 @@
+meta {
+  name: Comments - Create New Comment
+  type: http
+  seq: 20
+}
+
+post {
+  url: http://localhost:8081/api/comments
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "authorName": "Test User",
+    "text": "This is a test comment for the event. Great event!",
+    "eventId": 1
+  }
+}
+
+tests {
+  test("Create comment should return 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("Response should contain created comment", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('id');
+    expect(responseJson).to.have.property('authorName');
+    expect(responseJson).to.have.property('text');
+    expect(responseJson).to.have.property('createdAt');
+    expect(responseJson).to.have.property('eventId');
+    expect(responseJson).to.have.property('likeCount');
+    expect(responseJson).to.have.property('dislikeCount');
+  });
+
+  test("Comment should have correct values", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.authorName).to.equal('Test User');
+    expect(responseJson.text).to.equal('This is a test comment for the event. Great event!');
+    expect(responseJson.eventId).to.equal(1);
+    expect(responseJson.likeCount).to.equal(0);
+    expect(responseJson.dislikeCount).to.equal(0);
+  });
+}
+
+vars:post-response {
+  newCommentId: res.body.id
+}

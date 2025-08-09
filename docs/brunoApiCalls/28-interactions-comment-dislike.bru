@@ -1,0 +1,25 @@
+meta {
+  name: Interactions - Dislike Comment (Toggle Like to Dislike)
+  type: http
+  seq: 28
+}
+
+post {
+  url: http://localhost:8081/api/comments/{{newCommentId}}/dislike
+  body: none
+  auth: none
+}
+
+tests {
+  test("Comment dislike should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Should confirm comment was disliked (and like removed)", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('message');
+    expect(responseJson).to.have.property('action');
+    expect(responseJson.message).to.equal('Comment disliked');
+    expect(responseJson.action).to.equal('disliked');
+  });
+}

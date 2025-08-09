@@ -1,0 +1,34 @@
+meta {
+  name: Events - Similar Events by Tags
+  type: http
+  seq: 11
+}
+
+get {
+  url: http://localhost:8081/api/events/1/similar?limit=3
+  body: none
+  auth: none
+}
+
+tests {
+  test("Similar events should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Response should be an array", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.be.an('array');
+  });
+
+  test("Should not exceed limit of 3", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.length).to.be.at.most(3);
+  });
+
+  test("Similar events should not include the original event", function() {
+    const responseJson = res.getBody();
+    responseJson.forEach(event => {
+      expect(event.id).to.not.equal(1);
+    });
+  });
+}

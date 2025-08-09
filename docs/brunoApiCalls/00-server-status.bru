@@ -1,0 +1,18 @@
+meta {
+  name: Server Status - Check Tomcat and Context
+  type: http
+  seq: 0
+}
+
+get {
+  url: http://localhost:8081/
+  body: none
+  auth: none
+}
+
+tests {
+  test("Tomcat should be running", function() {
+    expect(res.getStatus()).to.be.oneOf([200, 404]);
+    // 200 = Tomcat default page, 404 = Tomcat running but no root app
+  });
+}

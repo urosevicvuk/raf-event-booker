@@ -1,0 +1,23 @@
+meta {
+  name: Interactions - Duplicate View Attempt (Same Session)
+  type: http
+  seq: 23
+}
+
+post {
+  url: http://localhost:8081/api/events/1/view
+  body: none
+  auth: none
+}
+
+tests {
+  test("Duplicate view should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Should indicate view was already counted", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('message');
+    expect(responseJson.message).to.equal('Already viewed in this session');
+  });
+}

@@ -1,0 +1,50 @@
+meta {
+  name: RSVP - Register for Event (Success)
+  type: http
+  seq: 13
+}
+
+post {
+  url: http://localhost:8081/api/rsvp
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "userIdentifier": "testuser@example.com",
+    "eventId": 1
+  }
+}
+
+tests {
+  test("RSVP registration should return 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("Response should confirm successful registration", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('message');
+    expect(responseJson).to.have.property('rsvp');
+    expect(responseJson.message).to.equal('Successfully registered for event');
+  });
+
+  test("RSVP object should have correct structure", function() {
+    const responseJson = res.getBody();
+    const rsvp = responseJson.rsvp;
+    expect(rsvp).to.have.property('id');
+    expect(rsvp).to.have.property('userIdentifier');
+    expect(rsvp).to.have.property('eventId');
+    expect(rsvp).to.have.property('registrationDate');
+    expect(rsvp.userIdentifier).to.equal('testuser@example.com');
+    expect(rsvp.eventId).to.equal(1);
+  });
+}
+
+vars:post-response {
+  rsvpId: res.body.rsvp.id
+}

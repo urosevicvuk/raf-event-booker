@@ -1,0 +1,39 @@
+meta {
+  name: Authentication Tests
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8081/api/users/login
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "admin@raf.rs",
+    "password": "admin123"
+  }
+}
+
+tests {
+  test("Login should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Login should return JWT token", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('jwt');
+    expect(responseJson.jwt).to.be.a('string');
+    expect(responseJson.jwt.length).to.be.greaterThan(0);
+  });
+}
+
+vars:post-response {
+  authToken: res.body.jwt
+}

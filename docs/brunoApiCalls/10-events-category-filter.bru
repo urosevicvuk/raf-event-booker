@@ -1,0 +1,38 @@
+meta {
+  name: Events - Filter by Category
+  type: http
+  seq: 10
+}
+
+get {
+  url: http://localhost:8081/api/events/category/1?page=1&limit=5
+  body: none
+  auth: none
+}
+
+tests {
+  test("Category filter should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Response should have proper structure", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('events');
+    expect(responseJson).to.have.property('categoryId');
+    expect(responseJson).to.have.property('page');
+    expect(responseJson).to.have.property('limit');
+    expect(responseJson.categoryId).to.equal(1);
+  });
+
+  test("All events should belong to specified category", function() {
+    const responseJson = res.getBody();
+    responseJson.events.forEach(event => {
+      expect(event.categoryId).to.equal(1);
+    });
+  });
+
+  test("Should respect pagination limit", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.events.length).to.be.at.most(5);
+  });
+}

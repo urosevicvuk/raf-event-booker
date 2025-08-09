@@ -1,0 +1,37 @@
+meta {
+  name: Events - Search Functionality
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:8081/api/events/search?q=koncert&page=1&limit=10
+  body: none
+  auth: none
+}
+
+tests {
+  test("Search should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Search response should have proper structure", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('events');
+    expect(responseJson).to.have.property('searchTerm');
+    expect(responseJson).to.have.property('page');
+    expect(responseJson).to.have.property('limit');
+    expect(responseJson.searchTerm).to.equal('koncert');
+  });
+
+  test("Search results should contain search term", function() {
+    const responseJson = res.getBody();
+    if (responseJson.events.length > 0) {
+      const hasSearchTerm = responseJson.events.some(event => 
+        event.title.toLowerCase().includes('koncert') || 
+        event.description.toLowerCase().includes('koncert')
+      );
+      expect(hasSearchTerm).to.be.true;
+    }
+  });
+}

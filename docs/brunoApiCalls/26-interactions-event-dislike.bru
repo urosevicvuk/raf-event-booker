@@ -1,0 +1,25 @@
+meta {
+  name: Interactions - Dislike Event (Session-based Toggle)
+  type: http
+  seq: 26
+}
+
+post {
+  url: http://localhost:8081/api/events/1/dislike
+  body: none
+  auth: none
+}
+
+tests {
+  test("Dislike should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Should confirm event was disliked", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('message');
+    expect(responseJson).to.have.property('action');
+    expect(responseJson.message).to.equal('Event disliked');
+    expect(responseJson.action).to.equal('disliked');
+  });
+}

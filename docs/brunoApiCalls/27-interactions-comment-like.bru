@@ -1,0 +1,25 @@
+meta {
+  name: Interactions - Like Comment (Session-based Toggle)
+  type: http
+  seq: 27
+}
+
+post {
+  url: http://localhost:8081/api/comments/{{newCommentId}}/like
+  body: none
+  auth: none
+}
+
+tests {
+  test("Comment like should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Should confirm comment was liked", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('message');
+    expect(responseJson).to.have.property('action');
+    expect(responseJson.message).to.equal('Comment liked');
+    expect(responseJson.action).to.equal('liked');
+  });
+}

@@ -1,0 +1,27 @@
+meta {
+  name: RSVP - Check User Registration Status
+  type: http
+  seq: 15
+}
+
+get {
+  url: http://localhost:8081/api/rsvp/event/1/user/testuser@example.com/status
+  body: none
+  auth: none
+}
+
+tests {
+  test("User RSVP status should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Response should confirm user is registered", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('eventId');
+    expect(responseJson).to.have.property('userIdentifier');
+    expect(responseJson).to.have.property('isRegistered');
+    expect(responseJson.eventId).to.equal(1);
+    expect(responseJson.userIdentifier).to.equal('testuser@example.com');
+    expect(responseJson.isRegistered).to.be.true;
+  });
+}
