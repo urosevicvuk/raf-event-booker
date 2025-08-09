@@ -209,26 +209,6 @@ public class MySqlRSVPRepository extends MySqlAbstractRepository implements RSVP
     }
 
     @Override
-    public void deleteRSVP(Integer eventId, String userIdentifier) {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        try {
-            connection = this.newConnection();
-
-            preparedStatement = connection.prepareStatement("DELETE FROM rsvp WHERE event_id = ? AND user_identifier = ?");
-            preparedStatement.setInt(1, eventId);
-            preparedStatement.setString(2, userIdentifier);
-            preparedStatement.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            this.closeStatement(preparedStatement);
-            this.closeConnection(connection);
-        }
-    }
-
-    @Override
     public void deleteRSVPsByEventId(Integer eventId) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -300,9 +280,91 @@ public class MySqlRSVPRepository extends MySqlAbstractRepository implements RSVP
         return exists;
     }
 
+
     @Override
-    public long countRSVPsByEventId(Integer eventId) {
-        long count = 0;
+    public List<RSVP> findRSVPsByEventIdPaginated(Integer eventId, int offset, int limit) {
+        List<RSVP> rsvps = new ArrayList<>();
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = this.newConnection();
+
+            preparedStatement = connection.prepareStatement(
+                "SELECT * FROM rsvp WHERE event_id = ? ORDER BY registration_date DESC LIMIT ? OFFSET ?"
+            );
+            preparedStatement.setInt(1, eventId);
+            preparedStatement.setInt(2, limit);
+            preparedStatement.setInt(3, offset);
+            resultSet = preparedStatement.executeQuery();
+            
+            while (resultSet.next()) {
+                rsvps.add(mapResultSetToRSVP(resultSet));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            this.closeStatement(preparedStatement);
+            this.closeResultSet(resultSet);
+            this.closeConnection(connection);
+        }
+
+        return rsvps;
+    }
+
+    @Override
+    public void deleteRSVPByUserAndEvent(String userIdentifier, Integer eventId) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = this.newConnection();
+
+            preparedStatement = connection.prepareStatement("DELETE FROM rsvp WHERE user_identifier = ? AND event_id = ?");
+            preparedStatement.setString(1, userIdentifier);
+            preparedStatement.setInt(2, eventId);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeStatement(preparedStatement);
+            this.closeConnection(connection);
+        }
+    }
+
+    @Override
+    public boolean isUserRegistered(String userIdentifier, Integer eventId) {
+        boolean exists = false;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = this.newConnection();
+
+            preparedStatement = connection.prepareStatement("SELECT 1 FROM rsvp WHERE user_identifier = ? AND event_id = ?");
+            preparedStatement.setString(1, userIdentifier);
+            preparedStatement.setInt(2, eventId);
+            resultSet = preparedStatement.executeQuery();
+
+            exists = resultSet.next();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeStatement(preparedStatement);
+            this.closeResultSet(resultSet);
+            this.closeConnection(connection);
+        }
+
+        return exists;
+    }
+
+    // Update return type from long to int to match interface
+    @Override
+    public int countRSVPsByEventId(Integer eventId) {
+        int count = 0;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -314,7 +376,7 @@ public class MySqlRSVPRepository extends MySqlAbstractRepository implements RSVP
             resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                count = resultSet.getLong(1);
+                count = resultSet.getInt(1);
             }
 
         } catch (SQLException e) {

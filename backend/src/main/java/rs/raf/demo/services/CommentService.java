@@ -53,25 +53,29 @@ public class CommentService {
         return this.commentRepository.existsById(id);
     }
 
-    // Event-related comment methods (using existing repository methods)
+    // Event-related comment methods
     public List<Comment> findCommentsByEventId(Integer eventId) {
         return this.commentRepository.findCommentsByEventId(eventId);
     }
 
-    // Reaction methods - simplified
-    public void likeComment(Integer commentId) {
-        Comment comment = this.commentRepository.findComment(commentId);
-        if (comment != null) {
-            comment.setLikeCount(comment.getLikeCount() + 1);
-            this.commentRepository.updateComment(comment);
-        }
+    public List<Comment> findCommentsByEventIdPaginated(Integer eventId, int offset, int limit) {
+        return this.commentRepository.findCommentsByEventIdPaginated(eventId, offset, limit);
     }
 
-    public void dislikeComment(Integer commentId) {
-        Comment comment = this.commentRepository.findComment(commentId);
-        if (comment != null) {
-            comment.setDislikeCount(comment.getDislikeCount() + 1);
-            this.commentRepository.updateComment(comment);
-        }
+    // Reaction methods with increment/decrement
+    public void incrementLikes(Integer commentId) {
+        this.commentRepository.incrementLikes(commentId);
+    }
+
+    public void decrementLikes(Integer commentId) {
+        this.commentRepository.decrementLikes(commentId);
+    }
+
+    public void incrementDislikes(Integer commentId) {
+        this.commentRepository.incrementDislikes(commentId);
+    }
+
+    public void decrementDislikes(Integer commentId) {
+        this.commentRepository.decrementDislikes(commentId);
     }
 }

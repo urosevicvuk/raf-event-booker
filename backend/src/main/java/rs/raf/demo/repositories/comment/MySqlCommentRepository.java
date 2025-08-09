@@ -26,10 +26,12 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
             );
             preparedStatement.setString(1, comment.getAuthorName());
             preparedStatement.setString(2, comment.getText());
-            preparedStatement.setTimestamp(3, Timestamp.valueOf(comment.getCreatedAt()));
+            // Handle potential null creation time - should not happen if service layer works correctly
+            LocalDateTime creationTime = comment.getCreatedAt() != null ? comment.getCreatedAt() : LocalDateTime.now();
+            preparedStatement.setTimestamp(3, Timestamp.valueOf(creationTime));
             preparedStatement.setInt(4, comment.getEventId());
-            preparedStatement.setInt(5, comment.getLikeCount());
-            preparedStatement.setInt(6, comment.getDislikeCount());
+            preparedStatement.setInt(5, comment.getLikeCount() != null ? comment.getLikeCount() : 0);
+            preparedStatement.setInt(6, comment.getDislikeCount() != null ? comment.getDislikeCount() : 0);
             preparedStatement.executeUpdate();
             resultSet = preparedStatement.getGeneratedKeys();
 
@@ -284,6 +286,115 @@ public class MySqlCommentRepository extends MySqlAbstractRepository implements C
         }
 
         return count;
+    }
+
+    @Override
+    public List<Comment> findCommentsByEventIdPaginated(Integer eventId, int offset, int limit) {
+        List<Comment> comments = new ArrayList<>();
+
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = this.newConnection();
+
+            preparedStatement = connection.prepareStatement(
+                "SELECT * FROM comment WHERE event_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?"
+            );
+            preparedStatement.setInt(1, eventId);
+            preparedStatement.setInt(2, limit);
+            preparedStatement.setInt(3, offset);
+            resultSet = preparedStatement.executeQuery();
+            
+            while (resultSet.next()) {
+                comments.add(mapResultSetToComment(resultSet));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            this.closeStatement(preparedStatement);
+            this.closeResultSet(resultSet);
+            this.closeConnection(connection);
+        }
+
+        return comments;
+    }
+
+    @Override
+    public void incrementLikes(Integer commentId) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = this.newConnection();
+
+            preparedStatement = connection.prepareStatement("UPDATE comment SET like_count = like_count + 1 WHERE id = ?");
+            preparedStatement.setInt(1, commentId);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeStatement(preparedStatement);
+            this.closeConnection(connection);
+        }
+    }
+
+    @Override
+    public void decrementLikes(Integer commentId) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = this.newConnection();
+
+            preparedStatement = connection.prepareStatement("UPDATE comment SET like_count = GREATEST(0, like_count - 1) WHERE id = ?");
+            preparedStatement.setInt(1, commentId);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeStatement(preparedStatement);
+            this.closeConnection(connection);
+        }
+    }
+
+    @Override
+    public void incrementDislikes(Integer commentId) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = this.newConnection();
+
+            preparedStatement = connection.prepareStatement("UPDATE comment SET dislike_count = dislike_count + 1 WHERE id = ?");
+            preparedStatement.setInt(1, commentId);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeStatement(preparedStatement);
+            this.closeConnection(connection);
+        }
+    }
+
+    @Override
+    public void decrementDislikes(Integer commentId) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = this.newConnection();
+
+            preparedStatement = connection.prepareStatement("UPDATE comment SET dislike_count = GREATEST(0, dislike_count - 1) WHERE id = ?");
+            preparedStatement.setInt(1, commentId);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeStatement(preparedStatement);
+            this.closeConnection(connection);
+        }
     }
 
     private Comment mapResultSetToComment(ResultSet resultSet) throws SQLException {

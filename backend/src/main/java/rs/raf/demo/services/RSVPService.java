@@ -30,28 +30,25 @@ public class RSVPService {
         return this.rsvpRepository.addRSVP(rsvp);
     }
 
-    public List<RSVP> allRSVPs() {
-        return this.rsvpRepository.allRSVPs();
-    }
-
-    public RSVP findRSVP(Integer id) {
-        return this.rsvpRepository.findRSVP(id);
-    }
-
-    public void deleteRSVP(Integer id) {
-        this.rsvpRepository.deleteRSVP(id);
-    }
-
     public boolean existsById(Integer id) {
         return this.rsvpRepository.existsById(id);
     }
 
-    // Basic count method (using existing repository methods)
+    // Enhanced RSVP methods
     public int getRSVPCount(Integer eventId) {
-        // Simple count by getting all RSVPs and filtering by eventId
-        List<RSVP> allRSVPs = this.rsvpRepository.allRSVPs();
-        return (int) allRSVPs.stream()
-                .filter(rsvp -> rsvp.getEventId().equals(eventId))
-                .count();
+        return this.rsvpRepository.countRSVPsByEventId(eventId);
     }
+
+    public List<RSVP> findRSVPsByEventId(Integer eventId) {
+        return this.rsvpRepository.findRSVPsByEventId(eventId);
+    }
+
+    public List<RSVP> findRSVPsByEventIdPaginated(Integer eventId, int offset, int limit) {
+        return this.rsvpRepository.findRSVPsByEventIdPaginated(eventId, offset, limit);
+    }
+
+    public boolean isUserRegistered(String userIdentifier, Integer eventId) {
+        return this.rsvpRepository.isUserRegistered(userIdentifier, eventId);
+    }
+
 }

@@ -1,5 +1,6 @@
 package rs.raf.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -17,9 +18,11 @@ public class Event {
     private String description;
     
     @NotNull(message = "Creation time field is required")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
     
     @NotNull(message = "Event date field is required")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
     
     @NotNull(message = "Location field is required")

@@ -9,12 +9,16 @@ public interface RSVPRepository {
     public List<RSVP> allRSVPs();
     public RSVP findRSVP(Integer id);
     public List<RSVP> findRSVPsByEventId(Integer eventId);
+
+    boolean existsByEventAndUser(Integer eventId, String userIdentifier);
+
+    public List<RSVP> findRSVPsByEventIdPaginated(Integer eventId, int offset, int limit);
     public List<RSVP> findRSVPsByUserIdentifier(String userIdentifier);
     public RSVP findRSVPByEventAndUser(Integer eventId, String userIdentifier);
     public void deleteRSVP(Integer id);
-    public void deleteRSVP(Integer eventId, String userIdentifier);
+    public void deleteRSVPByUserAndEvent(String userIdentifier, Integer eventId);
     public void deleteRSVPsByEventId(Integer eventId);
     public boolean existsById(Integer id);
-    public boolean existsByEventAndUser(Integer eventId, String userIdentifier);
-    public long countRSVPsByEventId(Integer eventId);
+    public boolean isUserRegistered(String userIdentifier, Integer eventId);
+    public int countRSVPsByEventId(Integer eventId);
 }

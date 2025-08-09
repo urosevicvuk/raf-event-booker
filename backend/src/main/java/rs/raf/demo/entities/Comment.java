@@ -1,5 +1,6 @@
 package rs.raf.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ public class Comment {
     private String text;
     
     @NotNull(message = "Creation date field is required")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
     
     @NotNull(message = "Event ID field is required")
