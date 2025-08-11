@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "raf-event-booker",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
