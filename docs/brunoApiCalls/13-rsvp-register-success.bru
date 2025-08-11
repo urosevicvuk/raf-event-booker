@@ -17,22 +17,27 @@ headers {
 body:json {
   {
     "userIdentifier": "testuser@example.com",
-    "eventId": 1
+    "eventId": 1,
+    "registrationDate": "2025-08-15 14:30:00"
   }
+}
+
+vars:post-response {
+  rsvpId: res.body.rsvp.id
 }
 
 tests {
   test("RSVP registration should return 201", function() {
     expect(res.getStatus()).to.equal(201);
   });
-
+  
   test("Response should confirm successful registration", function() {
     const responseJson = res.getBody();
     expect(responseJson).to.have.property('message');
     expect(responseJson).to.have.property('rsvp');
     expect(responseJson.message).to.equal('Successfully registered for event');
   });
-
+  
   test("RSVP object should have correct structure", function() {
     const responseJson = res.getBody();
     const rsvp = responseJson.rsvp;
@@ -43,8 +48,4 @@ tests {
     expect(rsvp.userIdentifier).to.equal('testuser@example.com');
     expect(rsvp.eventId).to.equal(1);
   });
-}
-
-vars:post-response {
-  rsvpId: res.body.rsvp.id
 }

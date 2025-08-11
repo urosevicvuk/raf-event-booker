@@ -18,15 +18,20 @@ body:json {
   {
     "authorName": "Test User",
     "text": "This is a test comment for the event. Great event!",
-    "eventId": 1
+    "eventId": 1,
+    "createdAt": "2025-08-15 14:30:00"
   }
+}
+
+vars:post-response {
+  newCommentId: res.body.id
 }
 
 tests {
   test("Create comment should return 201", function() {
     expect(res.getStatus()).to.equal(201);
   });
-
+  
   test("Response should contain created comment", function() {
     const responseJson = res.getBody();
     expect(responseJson).to.have.property('id');
@@ -37,7 +42,7 @@ tests {
     expect(responseJson).to.have.property('likeCount');
     expect(responseJson).to.have.property('dislikeCount');
   });
-
+  
   test("Comment should have correct values", function() {
     const responseJson = res.getBody();
     expect(responseJson.authorName).to.equal('Test User');
@@ -46,8 +51,4 @@ tests {
     expect(responseJson.likeCount).to.equal(0);
     expect(responseJson.dislikeCount).to.equal(0);
   });
-}
-
-vars:post-response {
-  newCommentId: res.body.id
 }

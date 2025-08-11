@@ -18,7 +18,8 @@ body:json {
   {
     "authorName": "Test User",
     "text": "This comment is for a non-existent event",
-    "eventId": 99999
+    "eventId": 99999,
+    "createdAt": "2025-08-15 14:30:00"
   }
 }
 
@@ -26,7 +27,7 @@ tests {
   test("Comment for non-existent event should return 400", function() {
     expect(res.getStatus()).to.equal(400);
   });
-
+  
   test("Should return appropriate error message", function() {
     const responseJson = res.getBody();
     expect(responseJson).to.have.property('message');

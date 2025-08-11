@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: http://localhost:8081/api/comments/{{newCommentId}}/like
+  url: http://localhost:8081/api/comments/1/like
   body: none
   auth: none
 }
@@ -14,7 +14,7 @@ tests {
   test("Comment like should return 200", function() {
     expect(res.getStatus()).to.equal(200);
   });
-
+  
   test("Should confirm comment was liked", function() {
     const responseJson = res.getBody();
     expect(responseJson).to.have.property('message');
