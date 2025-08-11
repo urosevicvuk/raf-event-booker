@@ -13,10 +13,10 @@ const PublicLayout: React.FC<PublicLayoutProps> = ({
   showSidebar = true 
 }) => {
   return (
-    <div className="public-layout">
+    <div className="public-layout theme-public">
       <PublicNavBar />
       <main className="public-content">
-        <div className="content-container">
+        <div className={`content-container ${!showSidebar ? 'no-sidebar' : ''}`}>
           <div className="main-content">
             {children}
           </div>

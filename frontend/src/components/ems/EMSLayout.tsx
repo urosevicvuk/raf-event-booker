@@ -8,7 +8,7 @@ interface EMSLayoutProps {
 
 const EMSLayout: React.FC<EMSLayoutProps> = ({ children }) => {
   return (
-    <div className="ems-layout">
+    <div className="ems-layout theme-ems">
       <EMSNavBar />
       <main className="ems-content">
         {children}

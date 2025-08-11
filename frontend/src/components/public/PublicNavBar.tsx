@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import type {Category} from '../../types';
 import CategoryService from '../../services/categoryService';
 import './PublicNavBar.css';
 
 const PublicNavBar: React.FC = () => {
+  const { isAuthenticated, logout } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showCategories, setShowCategories] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCategories();
@@ -26,8 +29,13 @@ const PublicNavBar: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchTerm.trim())}`;
+      navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
   return (
@@ -87,9 +95,19 @@ const PublicNavBar: React.FC = () => {
         </div>
 
         <div className="navbar-auth">
-          <Link to="/login" className="login-link">
-            Admin Login
-          </Link>
+          {isAuthenticated ? (
+            <div className="user-menu">
+              <Link to="/ems" className="ems-link">⚙️
+              </Link>
+              <button onClick={handleLogout} className="logout-btn-public">
+                Logout
+              </button>
+            </div>
+          ) : (
+            <Link to="/login" className="login-link">
+              Admin Login
+            </Link>
+          )}
         </div>
       </div>
     </nav>

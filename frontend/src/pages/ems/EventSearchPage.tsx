@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import EMSLayout from '../../components/ems/EMSLayout';
 import Table from '../../components/common/Table';
 import type {Event} from '../../types';
@@ -6,6 +7,7 @@ import EventService from '../../services/eventService';
 import './SearchPage.css';
 
 const EventSearchPage: React.FC = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(false);
@@ -63,7 +65,7 @@ const EventSearchPage: React.FC = () => {
   };
 
   const handleViewEvent = (event: Event) => {
-    window.open(`/event/${event.id}`, '_blank');
+    navigate(`/event/${event.id}`);
   };
 
   const columns = [

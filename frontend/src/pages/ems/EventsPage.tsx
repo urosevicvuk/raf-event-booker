@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import EMSLayout from '../../components/ems/EMSLayout';
 import Table from '../../components/common/Table';
 import Modal from '../../components/common/Modal';
@@ -9,6 +10,7 @@ import EventService from '../../services/eventService';
 
 const EventsPage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -101,8 +103,8 @@ const EventsPage: React.FC = () => {
   };
 
   const handleViewEvent = (event: Event) => {
-    // Open event in new tab on public site (when we build it)
-    window.open(`/event/${event.id}`, '_blank');
+    // Navigate to event in same tab
+    navigate(`/event/${event.id}`);
   };
 
   const columns = [

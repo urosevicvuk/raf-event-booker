@@ -166,68 +166,73 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
   return (
     <div className="event-interactions">
       <div className="interaction-section">
-        <h3>React to this Event</h3>
-        <div className="reaction-buttons">
-          <button
-            onClick={handleLike}
-            className={`reaction-btn like-btn ${hasLiked ? 'active' : ''}`}
-            disabled={interactionLoading}
-            title={hasLiked ? 'Remove like' : 'Like this event'}
-          >
-            👍 {event.likeCount}
-          </button>
-          <button
-            onClick={handleDislike}
-            className={`reaction-btn dislike-btn ${hasDisliked ? 'active' : ''}`}
-            disabled={interactionLoading}
-            title={hasDisliked ? 'Remove dislike' : 'Dislike this event'}
-          >
-            👎 {event.dislikeCount}
-          </button>
-        </div>
-      </div>
+        <h3>Event Interactions</h3>
+        
+        <div className="interactions-grid">
+          {/* Views and Stats */}
+          <div className="stats-container">
+            <div className="stat">
+              <span className="stat-label">Views</span>
+              <span className="stat-value">👁 {event.views}</span>
+            </div>
+            <div className="stat">
+              <span className="stat-label">Reactions</span>
+              <span className="stat-value">
+                {event.likeCount + event.dislikeCount}
+              </span>
+            </div>
+          </div>
 
-      {event.maxCapacity && (
-        <div className="interaction-section">
-          <h3>RSVP</h3>
-          <div className="rsvp-info">
-            <p>
-              <strong>{rsvpStatus.currentCount}</strong>
-              {event.maxCapacity && (
-                <span> / {event.maxCapacity}</span>
-              )}
-              <span> registered</span>
-            </p>
-            
-            {rsvpStatus.isFull ? (
-              <button className="rsvp-btn full" disabled>
-                Event Full
-              </button>
-            ) : (
+          {/* Reaction Buttons */}
+          <div className="reactions-container">
+            <div className="reaction-buttons">
               <button
-                onClick={handleRSVP}
-                className="rsvp-btn"
-                disabled={rsvpLoading}
+                onClick={handleLike}
+                className={`reaction-btn like-btn ${hasLiked ? 'active' : ''}`}
+                disabled={interactionLoading}
+                title={hasLiked ? 'Remove like' : 'Like this event'}
               >
-                {rsvpLoading ? 'Registering...' : 'RSVP'}
+                👍 {event.likeCount}
               </button>
-            )}
+              <button
+                onClick={handleDislike}
+                className={`reaction-btn dislike-btn ${hasDisliked ? 'active' : ''}`}
+                disabled={interactionLoading}
+                title={hasDisliked ? 'Remove dislike' : 'Dislike this event'}
+              >
+                👎 {event.dislikeCount}
+              </button>
+            </div>
           </div>
-        </div>
-      )}
 
-      <div className="interaction-section">
-        <div className="event-stats">
-          <div className="stat">
-            <span className="stat-label">Views</span>
-            <span className="stat-value">👁 {event.views}</span>
-          </div>
-          <div className="stat">
-            <span className="stat-label">Total Reactions</span>
-            <span className="stat-value">
-              {event.likeCount + event.dislikeCount}
-            </span>
-          </div>
+          {/* RSVP Section */}
+          {event.maxCapacity && (
+            <div className="rsvp-container">
+              <div className="rsvp-info">
+                <div className="rsvp-count">
+                  <strong>{rsvpStatus.currentCount}</strong>
+                  {event.maxCapacity && (
+                    <span> / {event.maxCapacity}</span>
+                  )}
+                  <span> registered</span>
+                </div>
+                
+                {rsvpStatus.isFull ? (
+                  <button className="rsvp-btn full" disabled>
+                    Event Full
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleRSVP}
+                    className="rsvp-btn"
+                    disabled={rsvpLoading}
+                  >
+                    {rsvpLoading ? 'Registering...' : 'RSVP'}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

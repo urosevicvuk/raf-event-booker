@@ -22,30 +22,35 @@ const EMSNavBar: React.FC = () => {
       <div className="navbar-container">
         <div className="navbar-brand">
           <Link to="/ems">
-            <h2>RAF Event Booker - EMS</h2>
+            <h2>RAF Event Booker</h2>
+            <span className="brand-suffix">Management</span>
           </Link>
         </div>
 
         <div className="navbar-menu">
+          <Link to="/" className="public-link">
+            🏠 Public Site
+          </Link>
+          
           <Link 
             to="/ems/categories" 
             className={isActive('/ems/categories') ? 'active' : ''}
           >
-            Categories
+            📂 Categories
           </Link>
           
           <Link 
             to="/ems/events" 
             className={isActive('/ems/events') ? 'active' : ''}
           >
-            Events
+            📅 Events
           </Link>
           
           <Link 
             to="/ems/search" 
             className={isActive('/ems/search') ? 'active' : ''}
           >
-            Search Events
+            🔍 Search
           </Link>
 
           {isAdmin && (
@@ -53,7 +58,7 @@ const EMSNavBar: React.FC = () => {
               to="/ems/users" 
               className={isActive('/ems/users') ? 'active' : ''}
             >
-              Users
+              👥 Users
             </Link>
           )}
         </div>

@@ -1,126 +1,201 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '../../components/public/PublicLayout';
-import type {Event} from '../../types';
+import type {Event, Category} from '../../types';
 import EventService from '../../services/eventService';
+import CategoryService from '../../services/categoryService';
+import './HomePage.css';
 
 const HomePage: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchLatestEvents();
+    fetchData();
   }, []);
 
-  const fetchLatestEvents = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const data = await EventService.getLatestEvents(10);
-      setEvents(data);
+      const [eventsData, categoriesData] = await Promise.all([
+        EventService.getLatestEvents(8),
+        CategoryService.getAllCategories()
+      ]);
+      setEvents(eventsData);
+      setCategories(categoriesData.slice(0, 6)); // Show only first 6 categories
     } catch (error) {
-      console.error('Error fetching latest events:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   };
 
   const truncateDescription = (text: string, maxLength: number = 200) => {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   };
 
-  if (loading) {
-    return (
-      <PublicLayout>
-        <div className="page-header">
-          <h1>Welcome to RAF Event Booker</h1>
-          <p>Discover and join exciting events at RAF</p>
-        </div>
-        <div style={{ padding: '40px', textAlign: 'center' }}>
-          <p>Loading latest events...</p>
-        </div>
-      </PublicLayout>
-    );
-  }
-
   return (
-    <PublicLayout>
-      <div className="page-header">
-        <h1>Welcome to RAF Event Booker</h1>
-        <p>Discover and join exciting events at RAF</p>
-      </div>
-
-      <div style={{ padding: '0' }}>
-        <div style={{ padding: '30px', borderBottom: '1px solid #eee' }}>
-          <h2 style={{ margin: '0 0 20px 0', color: '#2c3e50' }}>Latest Events</h2>
-          <p style={{ margin: 0, color: '#7f8c8d' }}>
-            Here are the 10 most recently created events
+    <PublicLayout showSidebar={false}>
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-content">
+          <h1 className="hero-title">
+            Welcome to <span className="hero-highlight">RAF Event Booker</span>
+          </h1>
+          <p className="hero-subtitle">
+            Discover, join, and create amazing events at the Faculty of Computing. 
+            Connect with fellow students and expand your horizons.
           </p>
+          <div className="hero-actions">
+            <Link to="/search" className="btn btn-primary btn-lg hero-btn">
+              🔍 Explore Events
+            </Link>
+            <Link to="/most-visited" className="btn btn-secondary btn-lg hero-btn">
+              🔥 Trending
+            </Link>
+          </div>
+        </div>
+        <div className="hero-stats">
+          <div className="stat-card">
+            <div className="stat-number">{events.length}</div>
+            <div className="stat-label">Active Events</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-number">{categories.length}</div>
+            <div className="stat-label">Categories</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-number">500+</div>
+            <div className="stat-label">Students</div>
+          </div>
+        </div>
+      </section>
+
+      {/* Categories Section */}
+      {categories.length > 0 && (
+        <section className="section">
+          <div className="section-header">
+            <h2>Browse by Category</h2>
+            <p>Find events that match your interests</p>
+          </div>
+          <div className="categories-grid">
+            {categories.map((category, index) => (
+              <Link
+                key={category.id}
+                to={`/category/${category.id}`}
+                className="category-card"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="category-icon">📂</div>
+                <h3>{category.name}</h3>
+                <p>{category.description}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Latest Events Section */}
+      <section className="section">
+        <div className="section-header">
+          <h2>Latest Events</h2>
+          <p>Recently added events you shouldn't miss</p>
         </div>
 
-        {events.length === 0 ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
+        {loading ? (
+          <div className="events-loading">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="event-skeleton">
+                <div className="skeleton skeleton-title"></div>
+                <div className="skeleton skeleton-text"></div>
+                <div className="skeleton skeleton-text"></div>
+                <div className="skeleton skeleton-tags"></div>
+              </div>
+            ))}
+          </div>
+        ) : events.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">📅</div>
             <h3>No events available</h3>
             <p>Check back later for new events!</p>
           </div>
         ) : (
-          <div>
-            {events.map(event => (
-              <div key={event.id} className="event-card">
-                <h3>
-                  <Link to={`/event/${event.id}`}>{event.title}</Link>
-                </h3>
-                
-                <div className="event-meta">
-                  <span>📅 {formatDate(event.eventDate)}</span>
-                  <span>📍 {event.location}</span>
-                  <span>👁 {event.views} views</span>
-                  <span>📂 {event.category?.name}</span>
-                  <span>
-                    👍 {event.likeCount} 👎 {event.dislikeCount}
-                  </span>
-                </div>
-
-                <div className="event-description">
-                  {truncateDescription(event.description)}
-                </div>
-
-                {event.tags && event.tags.length > 0 && (
-                  <div className="event-tags">
-                    {event.tags.map(tag => (
-                      <Link key={tag.id} to={`/tag/${tag.id}`} className="tag">
-                        {tag.name}
-                      </Link>
-                    ))}
+          <div className="events-grid">
+            {events.map((event, index) => (
+              <article
+                key={event.id}
+                className="event-card-modern"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="event-date-badge">
+                  <div className="event-day">
+                    {new Date(event.eventDate).getDate()}
                   </div>
-                )}
+                  <div className="event-month">
+                    {new Date(event.eventDate).toLocaleDateString('en-US', { month: 'short' })}
+                  </div>
+                </div>
 
-                <div style={{ marginTop: '15px' }}>
-                  <Link 
-                    to={`/event/${event.id}`} 
-                    style={{ 
-                      color: '#3498db', 
-                      textDecoration: 'none',
-                      fontWeight: 500
-                    }}
+                <div className="event-content">
+                  <h3 className="event-title">
+                    <Link to={`/event/${event.id}`}>{event.title}</Link>
+                  </h3>
+
+                  <div className="event-meta-modern">
+                    <span>📍 {event.location}</span>
+                    <span>👁 {event.views}</span>
+                    <span>👍 {event.likeCount}</span>
+                  </div>
+
+                  <p className="event-description-modern">
+                    {truncateDescription(event.description, 120)}
+                  </p>
+
+                  {event.tags && event.tags.length > 0 && (
+                    <div className="event-tags-modern">
+                      {event.tags.slice(0, 3).map(tag => (
+                        <Link
+                          key={tag.id}
+                          to={`/tag/${tag.id}`}
+                          className="tag-modern"
+                        >
+                          #{tag.name}
+                        </Link>
+                      ))}
+                      {event.tags.length > 3 && (
+                        <span className="tag-more">+{event.tags.length - 3}</span>
+                      )}
+                    </div>
+                  )}
+
+                  <Link
+                    to={`/event/${event.id}`}
+                    className="event-link-modern"
                   >
-                    View Details →
+                    View Details
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M5 12h14m-7-7l7 7-7 7" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </Link>
                 </div>
-              </div>
+
+                {event.category && (
+                  <div className="event-category-badge">
+                    {event.category.name}
+                  </div>
+                )}
+              </article>
             ))}
           </div>
         )}
-      </div>
+
+        <div className="section-footer">
+          <Link to="/search" className="btn btn-primary">
+            View All Events
+          </Link>
+        </div>
+      </section>
     </PublicLayout>
   );
 };

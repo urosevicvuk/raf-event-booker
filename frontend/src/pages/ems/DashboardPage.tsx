@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import EMSLayout from '../../components/ems/EMSLayout';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -27,25 +28,25 @@ const DashboardPage: React.FC = () => {
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               {isEventCreator && (
                 <>
-                  <a href="/ems/categories" className="btn btn-primary">
+                  <Link to="/ems/categories" className="btn btn-primary">
                     Manage Categories
-                  </a>
-                  <a href="/ems/events" className="btn btn-primary">
+                  </Link>
+                  <Link to="/ems/events" className="btn btn-primary">
                     Manage Events
-                  </a>
-                  <a href="/ems/search" className="btn btn-secondary">
+                  </Link>
+                  <Link to="/ems/search" className="btn btn-secondary">
                     Search Events
-                  </a>
+                  </Link>
                 </>
               )}
               {isAdmin && (
-                <a href="/ems/users" className="btn btn-warning">
+                <Link to="/ems/users" className="btn btn-warning">
                   Manage Users
-                </a>
+                </Link>
               )}
-              <a href="/" className="btn btn-secondary">
+              <Link to="/" className="btn btn-secondary">
                 View Public Site
-              </a>
+              </Link>
             </div>
           </div>
         </div>

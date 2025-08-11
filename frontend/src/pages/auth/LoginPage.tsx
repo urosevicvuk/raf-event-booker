@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import './LoginPage.css';
 
@@ -73,14 +73,13 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="login-container">
+    <div className="login-container theme-public">
       <div className="login-card">
         <h1>RAF Event Booker</h1>
         <h2>Sign In to EMS</h2>
         
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
-            <label htmlFor="email">Email</label>
             <input
               type="email"
               id="email"
@@ -88,12 +87,12 @@ const LoginPage: React.FC = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              placeholder="Enter your email"
+              placeholder=" "
             />
+            <label htmlFor="email">Email</label>
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
@@ -101,8 +100,9 @@ const LoginPage: React.FC = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              placeholder="Enter your password"
+              placeholder=" "
             />
+            <label htmlFor="password">Password</label>
           </div>
 
           {error && <div className="error-message">{error}</div>}
@@ -118,7 +118,7 @@ const LoginPage: React.FC = () => {
 
         <div className="login-footer">
           <p>
-            <a href="/">← Back to Public Site</a>
+            <Link to="/">← Back to Public Site</Link>
           </p>
         </div>
       </div>
