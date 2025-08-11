@@ -1,0 +1,29 @@
+.user-type.admin {
+  background: #e74c3c;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.user-type.creator {
+  background: #3498db;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.status.active {
+  color: #27ae60;
+  font-weight: 500;
+}
+
+.status.inactive {
+  color: #e74c3c;
+  font-weight: 500;
+}
