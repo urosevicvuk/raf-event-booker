@@ -128,23 +128,20 @@ const HomePage: React.FC = () => {
                 className="event-card-modern"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
+              <div className="event-content">
                 <div className="event-date-badge">
                   <div className="event-day">
-                    {new Date(event.eventDate).getDate()}
-                  </div>
-                  <div className="event-month">
+                    {new Date(event.eventDate).getDate()} { }
                     {new Date(event.eventDate).toLocaleDateString('en-US', { month: 'short' })}
                   </div>
-                </div>
-
-                <div className="event-content">
+                  </div>
                   <h3 className="event-title">
                     <Link to={`/event/${event.id}`}>{event.title}</Link>
                   </h3>
 
                   <div className="event-meta-modern">
-                    <span>📍 {event.location}</span>
-                    <span>👁 {event.views}</span>
+                    <span>📍 {event.location}</span> {}
+                    <span>👁 {event.views}</span> {}
                     <span>👍 {event.likeCount}</span>
                   </div>
 

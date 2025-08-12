@@ -43,7 +43,7 @@ const PublicNavBar: React.FC = () => {
       <div className="navbar-container">
         <div className="navbar-brand">
           <Link to="/">
-            <h2>RAF Event Booker</h2>
+            <h2 className={"navbar-brand"}>RAF Event Booker</h2>
           </Link>
         </div>
 

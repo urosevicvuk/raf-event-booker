@@ -45,7 +45,7 @@ const MostVisitedPage: React.FC = () => {
           <h1>Most Visited Events</h1>
           <p>Popular events from the last 30 days</p>
         </div>
-        <div style={{ padding: '40px', textAlign: 'center' }}>
+        <div className="content-section" style={{ textAlign: 'center' }}>
           <p>Loading most visited events...</p>
         </div>
       </PublicLayout>
@@ -59,51 +59,33 @@ const MostVisitedPage: React.FC = () => {
         <p>Popular events from the last 30 days</p>
       </div>
 
-      <div style={{ padding: '0' }}>
-        <div style={{ padding: '30px', borderBottom: '1px solid #eee' }}>
-          <h2 style={{ margin: '0 0 20px 0', color: '#2c3e50' }}>Top 10 Most Visited</h2>
-          <p style={{ margin: 0, color: '#7f8c8d' }}>
-            Events ranked by number of views in the past 30 days
-          </p>
-        </div>
+      <div className="content-section">
+        <h2>Top 10 Most Visited</h2>
+        <p>Events ranked by number of views in the past 30 days</p>
 
         {events.length === 0 ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
+          <div className="empty-state">
             <h3>No visited events</h3>
             <p>No events have been viewed in the last 30 days.</p>
           </div>
         ) : (
-          <div>
+          <div style={{ padding: 0 }}>
             {events.map((event, index) => (
               <div key={event.id} className="event-card">
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
-                  <div 
-                    style={{ 
-                      background: '#3498db', 
-                      color: 'white', 
-                      width: '30px', 
-                      height: '30px', 
-                      borderRadius: '50%', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      fontWeight: 'bold', 
-                      fontSize: '0.9rem',
-                      flexShrink: 0
-                    }}
-                  >
+                <div className="event-card-with-ranking">
+                  <div className="ranking-badge">
                     {index + 1}
                   </div>
                   
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ margin: '0 0 10px 0' }}>
+                  <div className="event-card-content">
+                    <h3>
                       <Link to={`/event/${event.id}`}>{event.title}</Link>
                     </h3>
                     
                     <div className="event-meta">
                       <span>📅 {formatDate(event.eventDate)}</span>
                       <span>📍 {event.location}</span>
-                      <span style={{ fontWeight: 'bold', color: '#e74c3c' }}>
+                      <span style={{ fontWeight: 'bold', color: 'var(--error)' }}>
                         👁 {event.views} views
                       </span>
                       <span>📂 {event.category?.name}</span>
@@ -125,19 +107,6 @@ const MostVisitedPage: React.FC = () => {
                         ))}
                       </div>
                     )}
-
-                    <div style={{ marginTop: '15px' }}>
-                      <Link 
-                        to={`/event/${event.id}`} 
-                        style={{ 
-                          color: '#3498db', 
-                          textDecoration: 'none',
-                          fontWeight: 500
-                        }}
-                      >
-                        View Details →
-                      </Link>
-                    </div>
                   </div>
                 </div>
               </div>
