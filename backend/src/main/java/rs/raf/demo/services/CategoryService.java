@@ -42,4 +42,12 @@ public class CategoryService {
     public boolean hasEvents(Integer categoryId) {
         return this.categoryRepository.hasEvents(categoryId);
     }
+
+    public Category findCategoryByName(String name) {
+        return this.categoryRepository.findCategoryByName(name);
+    }
+
+    public boolean existsByName(String name) {
+        return this.categoryRepository.existsByName(name);
+    }
 }

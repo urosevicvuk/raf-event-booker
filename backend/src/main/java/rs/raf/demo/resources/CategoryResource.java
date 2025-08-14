@@ -1,7 +1,9 @@
 package rs.raf.demo.resources;
 
 import rs.raf.demo.entities.Category;
+import rs.raf.demo.entities.Event;
 import rs.raf.demo.services.CategoryService;
+import rs.raf.demo.services.EventService;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -16,6 +18,9 @@ public class CategoryResource {
 
     @Inject
     private CategoryService categoryService;
+    
+    @Inject
+    private EventService eventService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -50,27 +55,35 @@ public class CategoryResource {
         return Response.ok(category).build();
     }
 
-    //@PUT
-    //@Path("/{id}")
-    //@Produces(MediaType.APPLICATION_JSON)
-    //@Consumes(MediaType.APPLICATION_JSON)
-    //public Response update(@PathParam("id") Integer id, @Valid Category category) {
-    //    if (!this.categoryService.existsById(id)) {
-    //        Map<String, String> response = new HashMap<>();
-    //        response.put("message", "Category not found");
-    //        return Response.status(Response.Status.NOT_FOUND).entity(response).build();
-    //    }
+    @PUT
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response update(@PathParam("id") Integer id, @Valid Category category) {
+        if (!this.categoryService.existsById(id)) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Category not found");
+            return Response.status(Response.Status.NOT_FOUND).entity(response).build();
+        }
 
-    //    try {
-    //        category.setId(id);
-    //        Category updatedCategory = this.categoryService.updateCategory(category);
-    //        return Response.ok(updatedCategory).build();
-    //    } catch (Exception e) {
-    //        Map<String, String> response = new HashMap<>();
-    //        response.put("message", "Error updating category: " + e.getMessage());
-    //        return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
-    //    }
-    //}
+        try {
+            // Check for duplicate name (excluding current category)
+            Category existingCategory = this.categoryService.findCategoryByName(category.getName());
+            if (existingCategory != null && !existingCategory.getId().equals(id)) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Category name already exists");
+                return Response.status(Response.Status.CONFLICT).entity(response).build();
+            }
+
+            category.setId(id);
+            Category updatedCategory = this.categoryService.updateCategory(category);
+            return Response.ok(updatedCategory).build();
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Error updating category: " + e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+        }
+    }
 
     @DELETE
     @Path("/{id}")
@@ -97,6 +110,38 @@ public class CategoryResource {
         } catch (Exception e) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Error deleting category: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+        }
+    }
+
+    // Get events by category (needed by frontend CategoryPage)
+    @GET
+    @Path("/{id}/events")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEventsByCategory(@PathParam("id") Integer categoryId,
+                                       @QueryParam("page") @DefaultValue("1") int page,
+                                       @QueryParam("limit") @DefaultValue("10") int limit) {
+        Category category = this.categoryService.findCategory(categoryId);
+        if (category == null) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Category not found");
+            return Response.status(Response.Status.NOT_FOUND).entity(response).build();
+        }
+
+        try {
+            int offset = (page - 1) * limit;
+            List<Event> events = this.eventService.findEventsByCategoryPaginated(categoryId, offset, limit);
+            // Populate events with their tags
+            events = this.eventService.populateEventsWithTags(events);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("events", events);
+            response.put("page", page);
+            response.put("limit", limit);
+            return Response.ok(response).build();
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Error fetching events: " + e.getMessage());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
         }
     }
