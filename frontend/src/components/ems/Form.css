@@ -12,7 +12,7 @@
 
 .form-group label {
   font-weight: 500;
-  color: var(--theme-text-primary);
+  color: var(--primary);
 }
 
 .form-group input,
@@ -29,7 +29,7 @@
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: var(--theme-primary);
+  border-color: var(--primary);
 }
 
 .form-group input.error,
