@@ -48,7 +48,7 @@ public class RSVPResource {
             if (currentCount >= event.getMaxCapacity()) {
                 Map<String, String> response = new HashMap<>();
                 response.put("message", "Event is full - maximum capacity reached");
-                return Response.status(Response.Status.CONFLICT).entity(response).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
             }
         }
 
@@ -83,10 +83,19 @@ public class RSVPResource {
         response.put("eventId", eventId);
         response.put("currentCount", currentCount);
         response.put("maxCapacity", event.getMaxCapacity());
-        response.put("isFullyBooked", event.getMaxCapacity() != null && currentCount >= event.getMaxCapacity());
+        response.put("canRegister", event.getMaxCapacity() == null || currentCount < event.getMaxCapacity());
+        response.put("isFull", event.getMaxCapacity() != null && currentCount >= event.getMaxCapacity());
         response.put("hasCapacityLimit", event.getMaxCapacity() != null && event.getMaxCapacity() > 0);
         
         return Response.ok(response).build();
+    }
+
+    // Alternative endpoint path that frontend expects
+    @GET
+    @Path("/status/{eventId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRSVPStatus(@PathParam("eventId") Integer eventId) {
+        return getEventRSVPStatus(eventId);
     }
 
     // Check if a user is registered for an event
