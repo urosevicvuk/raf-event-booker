@@ -139,4 +139,8 @@ export interface AuthContextType {
 export interface InteractionResponse {
   message: string;
   action: 'liked' | 'unliked' | 'disliked' | 'undisliked';
+  hasLiked: boolean;
+  hasDisliked: boolean;
+  likeCount: number;
+  dislikeCount: number;
 }
