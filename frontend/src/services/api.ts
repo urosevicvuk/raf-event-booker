@@ -4,6 +4,7 @@ const API_BASE_URL = 'http://localhost:8081/api';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true, // CRITICAL FIX: Send cookies for session management
   headers: {
     'Content-Type': 'application/json',
   },
