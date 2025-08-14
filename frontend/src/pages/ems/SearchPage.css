@@ -20,7 +20,7 @@
 
 .search-input:focus {
   outline: none;
-  border-color: var(--theme-primary);
+  border-color: var(--primary);
 }
 
 .search-results {
@@ -34,17 +34,16 @@
 }
 
 .search-results-header h3 {
-  color: var(--theme-text-primary);
+  color: var(--primary);
   margin-bottom: 5px;
 }
 
 .search-term {
-  color: var(--theme-primary);
+  color: var(--primary);
   font-weight: normal;
 }
 
 .results-count {
-  color: var(--theme-text-muted);
   margin: 0;
   font-size: 0.9rem;
 }
@@ -61,7 +60,7 @@
 
 .page-info {
   font-weight: 500;
-  color: var(--theme-text-primary);
+  color: var(--primary);
 }
 
 @media (max-width: 768px) {
