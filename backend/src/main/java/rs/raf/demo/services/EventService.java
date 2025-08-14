@@ -1,6 +1,7 @@
 package rs.raf.demo.services;
 
 import rs.raf.demo.entities.Event;
+import rs.raf.demo.entities.Tag;
 import rs.raf.demo.repositories.event.EventRepository;
 
 import javax.inject.Inject;
@@ -15,6 +16,9 @@ public class EventService {
 
     @Inject
     private EventRepository eventRepository;
+    
+    @Inject
+    private TagService tagService;
 
     public Event addEvent(Event event) {
         // Set creation time if not set
@@ -135,5 +139,56 @@ public class EventService {
     // RSVP related
     public int getCurrentRSVPCount(Integer eventId) {
         return this.eventRepository.getCurrentRSVPCount(eventId);
+    }
+
+    // Tag handling methods
+    public Event addEventWithTags(Event event, String tagsString) {
+        // First save the event
+        Event savedEvent = this.addEvent(event);
+        
+        // Then handle tags
+        if (tagsString != null && !tagsString.trim().isEmpty()) {
+            List<Tag> tags = this.tagService.findOrCreateTags(tagsString);
+            this.tagService.assignTagsToEvent(savedEvent.getId(), tags);
+        }
+        
+        // Return the event with tags populated
+        return this.getEventWithTags(savedEvent.getId());
+    }
+
+    public Event updateEventWithTags(Event event, String tagsString) {
+        // Update the event
+        Event updatedEvent = this.updateEvent(event);
+        
+        // Handle tags
+        if (tagsString != null) {
+            if (tagsString.trim().isEmpty()) {
+                // Remove all tags if empty string provided
+                this.tagService.assignTagsToEvent(event.getId(), new java.util.ArrayList<>());
+            } else {
+                List<Tag> tags = this.tagService.findOrCreateTags(tagsString);
+                this.tagService.assignTagsToEvent(event.getId(), tags);
+            }
+        }
+        
+        // Return the event with tags populated
+        return this.getEventWithTags(event.getId());
+    }
+
+    public Event getEventWithTags(Integer eventId) {
+        Event event = this.findEvent(eventId);
+        if (event != null) {
+            List<Tag> tags = this.tagService.getTagsForEvent(eventId);
+            event.setTags(tags);
+        }
+        return event;
+    }
+
+    public List<Event> populateEventsWithTags(List<Event> events) {
+        for (Event event : events) {
+            List<Tag> tags = this.tagService.getTagsForEvent(event.getId());
+            event.setTags(tags);
+        }
+        return events;
     }
 }

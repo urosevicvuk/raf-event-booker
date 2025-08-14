@@ -71,6 +71,18 @@ public class UserService {
         return this.userRepository.allUsers();
     }
 
+    public List<User> allUsers(int page, int limit) {
+        List<User> allUsers = this.userRepository.allUsers();
+        int startIndex = (page - 1) * limit;
+        int endIndex = Math.min(startIndex + limit, allUsers.size());
+        
+        if (startIndex >= allUsers.size()) {
+            return new java.util.ArrayList<>();
+        }
+        
+        return allUsers.subList(startIndex, endIndex);
+    }
+
     public User findUser(Integer id) {
         return this.userRepository.findUser(id);
     }
@@ -80,6 +92,13 @@ public class UserService {
     }
 
     public User updateUser(User user) {
+        // If password is being updated, hash it
+        if (user.getHashedPassword() != null && !user.getHashedPassword().isEmpty()) {
+            // Check if it's already hashed (SHA-256 hashes are 64 chars long)
+            if (user.getHashedPassword().length() != 64) {
+                user.setHashedPassword(DigestUtils.sha256Hex(user.getHashedPassword()));
+            }
+        }
         return this.userRepository.updateUser(user);
     }
 
@@ -107,5 +126,46 @@ public class UserService {
         return this.userRepository.allUsers().stream()
                 .filter(user -> userType.equals(user.getUserType()))
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    public User activateUser(Integer id) {
+        User user = this.findUser(id);
+        if (user != null) {
+            user.setStatus("active");
+            return this.userRepository.updateUser(user);
+        }
+        return null;
+    }
+
+    public User deactivateUser(Integer id) {
+        User user = this.findUser(id);
+        if (user != null && !"admin".equals(user.getUserType())) {
+            user.setStatus("inactive");
+            return this.userRepository.updateUser(user);
+        }
+        return null; // Cannot deactivate admin users
+    }
+
+    public boolean canDeleteUser(Integer id) {
+        User user = this.findUser(id);
+        return user != null && !"admin".equals(user.getUserType());
+    }
+
+    public void safeDeleteUser(Integer id) {
+        if (this.canDeleteUser(id)) {
+            this.deleteUser(id);
+        } else {
+            throw new RuntimeException("Cannot delete admin user");
+        }
+    }
+
+    public boolean changePassword(Integer userId, String newPassword) {
+        User user = this.findUser(userId);
+        if (user != null) {
+            user.setHashedPassword(DigestUtils.sha256Hex(newPassword));
+            this.userRepository.updateUser(user);
+            return true;
+        }
+        return false;
     }
 }

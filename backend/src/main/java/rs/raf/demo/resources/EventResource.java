@@ -27,22 +27,35 @@ public class EventResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response all() {
         List<Event> events = this.eventService.allEvents();
+        // Populate events with tags for EMS
+        events = this.eventService.populateEventsWithTags(events);
         return Response.ok(events).build();
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response create(@Valid Event event) {
-        Event savedEvent = this.eventService.addEvent(event);
-        return Response.status(Response.Status.CREATED).entity(savedEvent).build();
+    public Response create(@Valid Event event, @QueryParam("tags") String tagsString) {
+        try {
+            Event savedEvent;
+            if (tagsString != null && !tagsString.trim().isEmpty()) {
+                savedEvent = this.eventService.addEventWithTags(event, tagsString);
+            } else {
+                savedEvent = this.eventService.addEvent(event);
+            }
+            return Response.status(Response.Status.CREATED).entity(savedEvent).build();
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Error creating event: " + e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+        }
     }
 
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response find(@PathParam("id") Integer id) {
-        Event event = this.eventService.findEvent(id);
+        Event event = this.eventService.getEventWithTags(id);
         if (event == null) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Event not found");
@@ -55,15 +68,29 @@ public class EventResource {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response update(@PathParam("id") Integer id, @Valid Event event) {
+    public Response update(@PathParam("id") Integer id, @Valid Event event, @QueryParam("tags") String tagsString) {
         if (!this.eventService.existsById(id)) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Event not found");
             return Response.status(Response.Status.NOT_FOUND).entity(response).build();
         }
-        event.setId(id);
-        Event updatedEvent = this.eventService.updateEvent(event);
-        return Response.ok(updatedEvent).build();
+        
+        try {
+            event.setId(id);
+            Event updatedEvent;
+            if (tagsString != null) {
+                updatedEvent = this.eventService.updateEventWithTags(event, tagsString);
+            } else {
+                updatedEvent = this.eventService.updateEvent(event);
+                // Still need to populate tags for response
+                updatedEvent = this.eventService.getEventWithTags(updatedEvent.getId());
+            }
+            return Response.ok(updatedEvent).build();
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Error updating event: " + e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+        }
     }
 
     @DELETE
@@ -275,7 +302,7 @@ public class EventResource {
         Boolean hasLiked = (Boolean) session.getAttribute(likedKey);
         Boolean hasDisliked = (Boolean) session.getAttribute(dislikedKey);
         
-        Map<String, String> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         
         if (Boolean.TRUE.equals(hasLiked)) {
             // Unlike - remove like
@@ -283,6 +310,8 @@ public class EventResource {
             session.removeAttribute(likedKey);
             response.put("message", "Like removed");
             response.put("action", "unliked");
+            response.put("hasLiked", false);
+            response.put("hasDisliked", Boolean.TRUE.equals(hasDisliked));
         } else {
             // Add like
             if (Boolean.TRUE.equals(hasDisliked)) {
@@ -294,7 +323,14 @@ public class EventResource {
             session.setAttribute(likedKey, true);
             response.put("message", "Event liked");
             response.put("action", "liked");
+            response.put("hasLiked", true);
+            response.put("hasDisliked", false); // Always false after liking
         }
+        
+        // Add current event stats for frontend to update
+        Event currentEvent = this.eventService.findEvent(eventId);
+        response.put("likeCount", currentEvent.getLikeCount());
+        response.put("dislikeCount", currentEvent.getDislikeCount());
         
         return Response.ok(response).build();
     }
@@ -316,7 +352,7 @@ public class EventResource {
         Boolean hasLiked = (Boolean) session.getAttribute(likedKey);
         Boolean hasDisliked = (Boolean) session.getAttribute(dislikedKey);
         
-        Map<String, String> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         
         if (Boolean.TRUE.equals(hasDisliked)) {
             // Remove dislike
@@ -324,6 +360,8 @@ public class EventResource {
             session.removeAttribute(dislikedKey);
             response.put("message", "Dislike removed");
             response.put("action", "undisliked");
+            response.put("hasDisliked", false);
+            response.put("hasLiked", Boolean.TRUE.equals(hasLiked));
         } else {
             // Add dislike
             if (Boolean.TRUE.equals(hasLiked)) {
@@ -335,7 +373,14 @@ public class EventResource {
             session.setAttribute(dislikedKey, true);
             response.put("message", "Event disliked");
             response.put("action", "disliked");
+            response.put("hasDisliked", true);
+            response.put("hasLiked", false); // Always false after disliking
         }
+        
+        // Add current event stats for frontend to update
+        Event currentEvent = this.eventService.findEvent(eventId);
+        response.put("likeCount", currentEvent.getLikeCount());
+        response.put("dislikeCount", currentEvent.getDislikeCount());
         
         return Response.ok(response).build();
     }

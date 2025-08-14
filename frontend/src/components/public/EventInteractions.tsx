@@ -76,24 +76,29 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
       const likeKey = `liked_event_${event.id}`;
       const dislikeKey = `disliked_event_${event.id}`;
       
-      if (response.action === 'liked') {
-        setHasLiked(true);
-        setHasDisliked(false);
+      // Sync frontend state with backend session state
+      setHasLiked(response.hasLiked);
+      setHasDisliked(response.hasDisliked);
+      
+      // Update sessionStorage to match backend session
+      if (response.hasLiked) {
         sessionStorage.setItem(likeKey, 'true');
-        sessionStorage.removeItem(dislikeKey);
-        onEventUpdate({ 
-          ...event, 
-          likeCount: hasDisliked ? event.likeCount + 1 : event.likeCount + 1,
-          dislikeCount: hasDisliked ? event.dislikeCount - 1 : event.dislikeCount
-        });
-      } else if (response.action === 'unliked') {
-        setHasLiked(false);
+      } else {
         sessionStorage.removeItem(likeKey);
-        onEventUpdate({ 
-          ...event, 
-          likeCount: event.likeCount - 1
-        });
       }
+      
+      if (response.hasDisliked) {
+        sessionStorage.setItem(dislikeKey, 'true');
+      } else {
+        sessionStorage.removeItem(dislikeKey);
+      }
+      
+      // Use counts from backend response
+      onEventUpdate({ 
+        ...event, 
+        likeCount: response.likeCount,
+        dislikeCount: response.dislikeCount
+      });
     } catch (error) {
       console.error('Error liking event:', error);
       alert('Error processing like');
@@ -112,24 +117,29 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
       const likeKey = `liked_event_${event.id}`;
       const dislikeKey = `disliked_event_${event.id}`;
       
-      if (response.action === 'disliked') {
-        setHasDisliked(true);
-        setHasLiked(false);
-        sessionStorage.setItem(dislikeKey, 'true');
+      // Sync frontend state with backend session state
+      setHasLiked(response.hasLiked);
+      setHasDisliked(response.hasDisliked);
+      
+      // Update sessionStorage to match backend session
+      if (response.hasLiked) {
+        sessionStorage.setItem(likeKey, 'true');
+      } else {
         sessionStorage.removeItem(likeKey);
-        onEventUpdate({ 
-          ...event, 
-          dislikeCount: hasLiked ? event.dislikeCount + 1 : event.dislikeCount + 1,
-          likeCount: hasLiked ? event.likeCount - 1 : event.likeCount
-        });
-      } else if (response.action === 'undisliked') {
-        setHasDisliked(false);
-        sessionStorage.removeItem(dislikeKey);
-        onEventUpdate({ 
-          ...event, 
-          dislikeCount: event.dislikeCount - 1
-        });
       }
+      
+      if (response.hasDisliked) {
+        sessionStorage.setItem(dislikeKey, 'true');
+      } else {
+        sessionStorage.removeItem(dislikeKey);
+      }
+      
+      // Use counts from backend response
+      onEventUpdate({ 
+        ...event, 
+        likeCount: response.likeCount,
+        dislikeCount: response.dislikeCount
+      });
     } catch (error) {
       console.error('Error disliking event:', error);
       alert('Error processing dislike');

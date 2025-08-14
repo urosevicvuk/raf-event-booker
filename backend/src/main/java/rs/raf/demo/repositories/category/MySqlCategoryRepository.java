@@ -196,4 +196,62 @@ public class MySqlCategoryRepository extends MySqlAbstractRepository implements 
 
         return hasEvents;
     }
+
+    @Override
+    public Category findCategoryByName(String name) {
+        Category category = null;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = this.newConnection();
+
+            preparedStatement = connection.prepareStatement("SELECT * FROM category WHERE name = ?");
+            preparedStatement.setString(1, name);
+            resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                category = new Category(
+                    resultSet.getInt("id"),
+                    resultSet.getString("name"),
+                    resultSet.getString("description")
+                );
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeStatement(preparedStatement);
+            this.closeResultSet(resultSet);
+            this.closeConnection(connection);
+        }
+
+        return category;
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        boolean exists = false;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = this.newConnection();
+
+            preparedStatement = connection.prepareStatement("SELECT 1 FROM category WHERE name = ?");
+            preparedStatement.setString(1, name);
+            resultSet = preparedStatement.executeQuery();
+
+            exists = resultSet.next();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeStatement(preparedStatement);
+            this.closeResultSet(resultSet);
+            this.closeConnection(connection);
+        }
+
+        return exists;
+    }
 }
