@@ -1,0 +1,42 @@
+meta {
+  name: Users - Update Non-existent User
+  type: http
+  seq: 38
+}
+
+put {
+  url: http://localhost:8081/api/users/99999
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "nonexistent@example.com",
+    "firstName": "Non",
+    "lastName": "Existent",
+    "userType": "event creator",
+    "status": "active"
+  }
+}
+
+tests {
+  test("Update non-existent user should return 404", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+  
+  test("Response should contain error message", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('message');
+    expect(responseJson.message).to.be.a('string');
+    expect(responseJson.message.toLowerCase()).to.include('not found');
+  });
+}

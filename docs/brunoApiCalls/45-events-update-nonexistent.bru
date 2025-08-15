@@ -1,0 +1,44 @@
+meta {
+  name: Events - Update Non-existent Event
+  type: http
+  seq: 45
+}
+
+put {
+  url: http://localhost:8081/api/events/99999
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Non-existent Event Update",
+    "description": "Attempting to update an event that doesn't exist",
+    "eventDate": "2025-12-20 18:00:00",
+    "location": "Test Location",
+    "authorId": 2,
+    "categoryId": 1,
+    "maxCapacity": 100
+  }
+}
+
+tests {
+  test("Update non-existent event should return 404", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+  
+  test("Response should contain not found error", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('message');
+    expect(responseJson.message).to.be.a('string');
+    expect(responseJson.message.toLowerCase()).to.include('not found');
+  });
+}

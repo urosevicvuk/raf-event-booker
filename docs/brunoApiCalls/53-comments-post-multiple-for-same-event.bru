@@ -1,0 +1,44 @@
+meta {
+  name: Comments - Post Multiple Comments for Same Event
+  type: http
+  seq: 53
+}
+
+post {
+  url: http://localhost:8081/api/comments
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "authorName": "Frequent Commenter",
+    "text": "This is the first of multiple comments I'm posting for this event to test bulk commenting functionality.",
+    "eventId": 1,
+    "createdAt": "2025-08-14 17:10:00"
+  }
+}
+
+vars:post-response {
+  firstMultiCommentId: res.body.id
+}
+
+tests {
+  test("First multiple comment should return 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  
+  test("Response should contain first comment", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('id');
+    expect(responseJson).to.have.property('authorName');
+    expect(responseJson).to.have.property('text');
+    expect(responseJson.authorName).to.equal('Frequent Commenter');
+    expect(responseJson.text).to.include('first of multiple comments');
+    expect(responseJson.eventId).to.equal(1);
+  });
+}

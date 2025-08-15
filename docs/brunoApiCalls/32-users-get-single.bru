@@ -1,0 +1,45 @@
+meta {
+  name: Users - Get Single User by ID
+  type: http
+  seq: 32
+}
+
+get {
+  url: http://localhost:8081/api/users/2
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+vars:post-response {
+  testUserId: res.body.id
+  testUserEmail: res.body.email
+}
+
+tests {
+  test("Get single user should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Response should contain user details", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('id');
+    expect(responseJson).to.have.property('email');
+    expect(responseJson).to.have.property('firstName');
+    expect(responseJson).to.have.property('lastName');
+    expect(responseJson).to.have.property('userType');
+    expect(responseJson).to.have.property('status');
+  });
+  
+  test("User ID should match requested ID", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.id).to.equal(2);
+  });
+}

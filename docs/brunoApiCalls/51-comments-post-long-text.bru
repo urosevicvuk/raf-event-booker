@@ -1,0 +1,51 @@
+meta {
+  name: Comments - Post Comment with Very Long Text
+  type: http
+  seq: 51
+}
+
+post {
+  url: http://localhost:8081/api/comments
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "authorName": "Long Comment Tester",
+    "text": "This is a very long comment that tests the system's ability to handle extended text content. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.",
+    "eventId": 2,
+    "createdAt": "2025-08-14 17:00:00"
+  }
+}
+
+vars:post-response {
+  longCommentId: res.body.id
+}
+
+tests {
+  test("Post long comment should return 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  
+  test("Response should contain complete long text", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('text');
+    expect(responseJson.text).to.include('Lorem ipsum');
+    expect(responseJson.text).to.include('voluptatem sequi nesciunt');
+    expect(responseJson.text.length).to.be.greaterThan(500);
+  });
+  
+  test("All required fields should be present", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('id');
+    expect(responseJson).to.have.property('authorName');
+    expect(responseJson).to.have.property('eventId');
+    expect(responseJson.eventId).to.equal(2);
+    expect(responseJson.authorName).to.equal('Long Comment Tester');
+  });
+}

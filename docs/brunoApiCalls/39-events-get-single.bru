@@ -1,0 +1,38 @@
+meta {
+  name: Events - Get Single Event for Update Tests
+  type: http
+  seq: 39
+}
+
+get {
+  url: http://localhost:8081/api/events/1
+  body: none
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+vars:post-response {
+  existingEventId: res.body.id
+  existingEventTitle: res.body.title
+  existingEventAuthorId: res.body.authorId
+  existingCategoryId: res.body.categoryId
+}
+
+tests {
+  test("Get single event should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Response should contain event details", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('id');
+    expect(responseJson).to.have.property('title');
+    expect(responseJson).to.have.property('description');
+    expect(responseJson).to.have.property('authorId');
+    expect(responseJson).to.have.property('categoryId');
+    expect(responseJson).to.have.property('location');
+  });
+}

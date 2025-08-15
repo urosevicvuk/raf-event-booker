@@ -1,0 +1,67 @@
+meta {
+  name: Events - Create Event for Update Testing
+  type: http
+  seq: 40
+}
+
+post {
+  url: http://localhost:8081/api/events
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Bruno Test Event - Original",
+    "description": "This is a test event created by Bruno for update testing purposes. Original description.",
+    "eventDate": "2025-10-15 18:00:00",
+    "location": "Original Test Location",
+    "authorId": 2,
+    "categoryId": 1,
+    "maxCapacity": 100,
+    "tags": [
+      {"name": "testing"},
+      {"name": "bruno"}
+    ]
+  }
+}
+
+vars:post-response {
+  testEventId: res.body.id
+  testEventTitle: res.body.title
+}
+
+tests {
+  test("Create test event should return 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  
+  test("Response should contain created event", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('id');
+    expect(responseJson).to.have.property('title');
+    expect(responseJson).to.have.property('description');
+    expect(responseJson).to.have.property('eventDate');
+    expect(responseJson).to.have.property('location');
+    expect(responseJson).to.have.property('authorId');
+    expect(responseJson).to.have.property('categoryId');
+    expect(responseJson).to.have.property('maxCapacity');
+  });
+  
+  test("Event should have correct initial values", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.title).to.equal('Bruno Test Event - Original');
+    expect(responseJson.location).to.equal('Original Test Location');
+    expect(responseJson.maxCapacity).to.equal(100);
+    expect(responseJson.authorId).to.equal(2);
+    expect(responseJson.categoryId).to.equal(1);
+  });
+}

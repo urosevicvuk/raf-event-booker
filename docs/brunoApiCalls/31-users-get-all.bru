@@ -1,0 +1,43 @@
+meta {
+  name: Users - Get All Users (Admin Only)
+  type: http
+  seq: 31
+}
+
+get {
+  url: http://localhost:8081/api/users
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+tests {
+  test("Get all users should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Response should be an array", function() {
+    const responseJson = res.getBody();
+    expect(Array.isArray(responseJson)).to.be.true;
+  });
+  
+  test("Users should have required properties", function() {
+    const responseJson = res.getBody();
+    if (responseJson.length > 0) {
+      const user = responseJson[0];
+      expect(user).to.have.property('id');
+      expect(user).to.have.property('email');
+      expect(user).to.have.property('firstName');
+      expect(user).to.have.property('lastName');
+      expect(user).to.have.property('userType');
+      expect(user).to.have.property('status');
+    }
+  });
+}

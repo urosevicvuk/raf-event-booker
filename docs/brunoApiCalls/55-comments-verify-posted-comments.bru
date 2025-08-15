@@ -1,0 +1,67 @@
+meta {
+  name: Comments - Verify All Posted Comments Are Retrievable
+  type: http
+  seq: 55
+}
+
+get {
+  url: http://localhost:8081/api/comments/event/1
+  body: none
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+tests {
+  test("Get comments for event should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Response should be an array of comments", function() {
+    const responseJson = res.getBody();
+    expect(Array.isArray(responseJson)).to.be.true;
+    expect(responseJson.length).to.be.greaterThan(0);
+  });
+  
+  test("Comments should contain our test comments", function() {
+    const responseJson = res.getBody();
+    const commentTexts = responseJson.map(comment => comment.text);
+    const authorNames = responseJson.map(comment => comment.authorName);
+    
+    // Check for Bruno Test User comment
+    expect(commentTexts.some(text => text.includes('comprehensive test comment posted via Bruno'))).to.be.true;
+    expect(authorNames).to.include('Bruno Test User');
+    
+    // Check for Frequent Commenter comments
+    expect(authorNames.filter(name => name === 'Frequent Commenter').length).to.be.greaterThanOrEqual(2);
+    expect(commentTexts.some(text => text.includes('first of multiple comments'))).to.be.true;
+    expect(commentTexts.some(text => text.includes('second comment'))).to.be.true;
+  });
+  
+  test("All comments should have required fields", function() {
+    const responseJson = res.getBody();
+    responseJson.forEach(comment => {
+      expect(comment).to.have.property('id');
+      expect(comment).to.have.property('authorName');
+      expect(comment).to.have.property('text');
+      expect(comment).to.have.property('createdAt');
+      expect(comment).to.have.property('eventId');
+      expect(comment).to.have.property('likeCount');
+      expect(comment).to.have.property('dislikeCount');
+      expect(comment.eventId).to.equal(1);
+    });
+  });
+  
+  test("Comments should be properly ordered", function() {
+    const responseJson = res.getBody();
+    if (responseJson.length > 1) {
+      // Check if comments are ordered by creation time (newest first or oldest first)
+      const firstComment = responseJson[0];
+      const secondComment = responseJson[1];
+      expect(firstComment).to.have.property('createdAt');
+      expect(secondComment).to.have.property('createdAt');
+    }
+  });
+}

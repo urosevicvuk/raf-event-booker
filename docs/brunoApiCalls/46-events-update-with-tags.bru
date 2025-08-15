@@ -1,0 +1,75 @@
+meta {
+  name: Events - Update Event with Complex Tag Changes
+  type: http
+  seq: 46
+}
+
+put {
+  url: http://localhost:8081/api/events/{{testEventId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Bruno Test Event - Final Version",
+    "description": "This is the final version of our test event with completely new tags and updated content. We are testing the tag assignment functionality.",
+    "eventDate": "2025-12-31 23:00:00",
+    "location": "New Year's Event Venue",
+    "authorId": 2,
+    "categoryId": 1,
+    "maxCapacity": 200,
+    "tags": [
+      {"name": "final-test"},
+      {"name": "new-year"},
+      {"name": "celebration"},
+      {"name": "bruno"},
+      {"name": "automated-testing"}
+    ]
+  }
+}
+
+tests {
+  test("Update event with complex tags should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Response should contain updated event with all details", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('id');
+    expect(responseJson).to.have.property('title');
+    expect(responseJson).to.have.property('description');
+    expect(responseJson).to.have.property('eventDate');
+    expect(responseJson).to.have.property('location');
+    expect(responseJson).to.have.property('maxCapacity');
+    expect(responseJson).to.have.property('tags');
+  });
+  
+  test("Event should have final updated values", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.title).to.equal('Bruno Test Event - Final Version');
+    expect(responseJson.location).to.equal('New Year\'s Event Venue');
+    expect(responseJson.maxCapacity).to.equal(200);
+    expect(responseJson.description).to.include('final version');
+  });
+  
+  test("Tags should be properly assigned", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.tags).to.be.an('array');
+    expect(responseJson.tags.length).to.be.greaterThan(0);
+    
+    // Check for specific tags
+    const tagNames = responseJson.tags.map(tag => tag.name);
+    expect(tagNames).to.include('final-test');
+    expect(tagNames).to.include('bruno');
+    expect(tagNames).to.include('new-year');
+  });
+}

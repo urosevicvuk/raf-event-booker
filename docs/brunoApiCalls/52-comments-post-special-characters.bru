@@ -1,0 +1,53 @@
+meta {
+  name: Comments - Post Comment with Special Characters
+  type: http
+  seq: 52
+}
+
+post {
+  url: http://localhost:8081/api/comments
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "authorName": "Марко Петровић",
+    "text": "Овај коментар садржи специјалне карактере: !@#$%^&*()_+-={}[]|\\:;\"'<>?,./ и ћирилица. Тестирамо подршку за различите карактере и Unicode. Emoji тест: 🎉🎵🎪 Математички симболи: ∑∆π≠≤≥",
+    "eventId": 3,
+    "createdAt": "2025-08-14 17:05:00"
+  }
+}
+
+vars:post-response {
+  specialCommentId: res.body.id
+}
+
+tests {
+  test("Post comment with special characters should return 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  
+  test("Response should preserve special characters", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('authorName');
+    expect(responseJson).to.have.property('text');
+    expect(responseJson.authorName).to.equal('Марко Петровић');
+    expect(responseJson.text).to.include('ћирилица');
+    expect(responseJson.text).to.include('🎉🎵🎪');
+    expect(responseJson.text).to.include('∑∆π≠≤≥');
+  });
+  
+  test("Special characters should not break JSON structure", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('id');
+    expect(responseJson).to.have.property('eventId');
+    expect(responseJson.eventId).to.equal(3);
+    expect(responseJson.likeCount).to.equal(0);
+    expect(responseJson.dislikeCount).to.equal(0);
+  });
+}

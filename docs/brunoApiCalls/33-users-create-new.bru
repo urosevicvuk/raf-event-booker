@@ -1,0 +1,66 @@
+meta {
+  name: Users - Create New User (Admin Only)
+  type: http
+  seq: 33
+}
+
+post {
+  url: http://localhost:8081/api/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "testuser.bruno@example.com",
+    "firstName": "Bruno",
+    "lastName": "Test",
+    "userType": "event creator",
+    "status": "active",
+    "password": "testpass123"
+  }
+}
+
+vars:post-response {
+  newUserId: res.body.id
+  newUserEmail: res.body.email
+}
+
+tests {
+  test("Create user should return 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  
+  test("Response should contain created user", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('id');
+    expect(responseJson).to.have.property('email');
+    expect(responseJson).to.have.property('firstName');
+    expect(responseJson).to.have.property('lastName');
+    expect(responseJson).to.have.property('userType');
+    expect(responseJson).to.have.property('status');
+  });
+  
+  test("User should have correct values", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.email).to.equal('testuser.bruno@example.com');
+    expect(responseJson.firstName).to.equal('Bruno');
+    expect(responseJson.lastName).to.equal('Test');
+    expect(responseJson.userType).to.equal('event creator');
+    expect(responseJson.status).to.equal('active');
+  });
+  
+  test("Password should not be returned", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.not.have.property('password');
+    expect(responseJson).to.not.have.property('hashedPassword');
+  });
+}

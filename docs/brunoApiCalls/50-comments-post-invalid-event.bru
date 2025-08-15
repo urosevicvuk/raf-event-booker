@@ -1,0 +1,38 @@
+meta {
+  name: Comments - Post Comment for Non-existent Event
+  type: http
+  seq: 50
+}
+
+post {
+  url: http://localhost:8081/api/comments
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "authorName": "Test User",
+    "text": "This comment is for a non-existent event",
+    "eventId": 99999,
+    "createdAt": "2025-08-14 16:55:00"
+  }
+}
+
+tests {
+  test("Post comment for invalid event should return 400 or 404", function() {
+    const status = res.getStatus();
+    expect([400, 404]).to.include(status);
+  });
+  
+  test("Response should contain error about event", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('message');
+    expect(responseJson.message).to.be.a('string');
+    expect(responseJson.message.toLowerCase()).to.include('event');
+  });
+}

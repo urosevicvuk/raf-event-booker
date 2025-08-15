@@ -1,0 +1,59 @@
+meta {
+  name: Users - Update User (Valid Request)
+  type: http
+  seq: 34
+}
+
+put {
+  url: http://localhost:8081/api/users/{{newUserId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "testuser.bruno.updated@example.com",
+    "firstName": "Bruno",
+    "lastName": "Updated",
+    "userType": "event creator",
+    "status": "inactive"
+  }
+}
+
+tests {
+  test("Update user should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Response should contain updated user", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('id');
+    expect(responseJson).to.have.property('email');
+    expect(responseJson).to.have.property('firstName');
+    expect(responseJson).to.have.property('lastName');
+    expect(responseJson).to.have.property('userType');
+    expect(responseJson).to.have.property('status');
+  });
+  
+  test("User should have updated values", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.email).to.equal('testuser.bruno.updated@example.com');
+    expect(responseJson.firstName).to.equal('Bruno');
+    expect(responseJson.lastName).to.equal('Updated');
+    expect(responseJson.userType).to.equal('event creator');
+    expect(responseJson.status).to.equal('inactive');
+  });
+  
+  test("User ID should remain unchanged", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.id).to.equal(parseInt('{{newUserId}}'));
+  });
+}

@@ -1,0 +1,50 @@
+meta {
+  name: Comments - Post Second Comment for Same Event
+  type: http
+  seq: 54
+}
+
+post {
+  url: http://localhost:8081/api/comments
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "authorName": "Frequent Commenter",
+    "text": "This is my second comment on the same event. Testing that the system allows multiple comments from the same user on the same event.",
+    "eventId": 1,
+    "createdAt": "2025-08-14 17:12:00"
+  }
+}
+
+vars:post-response {
+  secondMultiCommentId: res.body.id
+}
+
+tests {
+  test("Second multiple comment should return 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  
+  test("Response should contain second comment", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('id');
+    expect(responseJson).to.have.property('authorName');
+    expect(responseJson).to.have.property('text');
+    expect(responseJson.authorName).to.equal('Frequent Commenter');
+    expect(responseJson.text).to.include('second comment');
+    expect(responseJson.eventId).to.equal(1);
+  });
+  
+  test("Comment ID should be different from first comment", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.id).to.not.equal(parseInt('{{firstMultiCommentId}}'));
+    expect(responseJson.id).to.be.greaterThan(parseInt('{{firstMultiCommentId}}'));
+  });
+}

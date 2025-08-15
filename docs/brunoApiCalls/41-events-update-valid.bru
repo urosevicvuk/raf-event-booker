@@ -1,0 +1,78 @@
+meta {
+  name: Events - Update Event (Valid Request)
+  type: http
+  seq: 41
+}
+
+put {
+  url: http://localhost:8081/api/events/{{testEventId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Bruno Test Event - Updated Version",
+    "description": "This test event has been successfully updated with new information. The description is now completely different and much more detailed.",
+    "eventDate": "2025-11-20 19:30:00",
+    "location": "Updated Test Venue, Belgrade",
+    "authorId": 2,
+    "categoryId": 2,
+    "maxCapacity": 150,
+    "tags": [
+      {"name": "updated"},
+      {"name": "testing"},
+      {"name": "bruno"}
+    ]
+  }
+}
+
+tests {
+  test("Update event should return 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+  
+  test("Response should contain updated event", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('id');
+    expect(responseJson).to.have.property('title');
+    expect(responseJson).to.have.property('description');
+    expect(responseJson).to.have.property('eventDate');
+    expect(responseJson).to.have.property('location');
+    expect(responseJson).to.have.property('authorId');
+    expect(responseJson).to.have.property('categoryId');
+    expect(responseJson).to.have.property('maxCapacity');
+  });
+  
+  test("Event should have updated values", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.title).to.equal('Bruno Test Event - Updated Version');
+    expect(responseJson.description).to.include('successfully updated');
+    expect(responseJson.location).to.equal('Updated Test Venue, Belgrade');
+    expect(responseJson.maxCapacity).to.equal(150);
+    expect(responseJson.categoryId).to.equal(2);
+  });
+  
+  test("Event ID should remain unchanged", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.id).to.equal(parseInt('{{testEventId}}'));
+  });
+  
+  test("Views and reactions should be preserved", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('views');
+    expect(responseJson).to.have.property('likeCount');
+    expect(responseJson).to.have.property('dislikeCount');
+    expect(responseJson.views).to.be.a('number');
+    expect(responseJson.likeCount).to.be.a('number');
+    expect(responseJson.dislikeCount).to.be.a('number');
+  });
+}

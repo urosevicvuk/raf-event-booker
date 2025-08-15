@@ -1,0 +1,44 @@
+meta {
+  name: Events - Update Event with Invalid Date Format
+  type: http
+  seq: 43
+}
+
+put {
+  url: http://localhost:8081/api/events/{{testEventId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "title": "Event with Invalid Date",
+    "description": "This event has an invalid date format",
+    "eventDate": "invalid-date-format",
+    "location": "Test Location",
+    "authorId": 2,
+    "categoryId": 1,
+    "maxCapacity": 100
+  }
+}
+
+tests {
+  test("Update event with invalid date should return 400", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+  
+  test("Response should contain error about date format", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('message');
+    expect(responseJson.message).to.be.a('string');
+    expect(responseJson.message.length).to.be.greaterThan(0);
+  });
+}

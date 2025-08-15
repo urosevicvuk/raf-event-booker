@@ -1,0 +1,68 @@
+meta {
+  name: Comments - Post Valid Comment
+  type: http
+  seq: 47
+}
+
+post {
+  url: http://localhost:8081/api/comments
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "authorName": "Bruno Test User",
+    "text": "This is a comprehensive test comment posted via Bruno API testing. The comment includes multiple sentences and proper punctuation to test text validation.",
+    "eventId": 1,
+    "createdAt": "2025-08-14 16:45:00"
+  }
+}
+
+vars:post-response {
+  validCommentId: res.body.id
+  validCommentAuthor: res.body.authorName
+  validCommentText: res.body.text
+}
+
+tests {
+  test("Post valid comment should return 201", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  
+  test("Response should contain created comment with all fields", function() {
+    const responseJson = res.getBody();
+    expect(responseJson).to.have.property('id');
+    expect(responseJson).to.have.property('authorName');
+    expect(responseJson).to.have.property('text');
+    expect(responseJson).to.have.property('createdAt');
+    expect(responseJson).to.have.property('eventId');
+    expect(responseJson).to.have.property('likeCount');
+    expect(responseJson).to.have.property('dislikeCount');
+  });
+  
+  test("Comment should have correct values", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.authorName).to.equal('Bruno Test User');
+    expect(responseJson.text).to.equal('This is a comprehensive test comment posted via Bruno API testing. The comment includes multiple sentences and proper punctuation to test text validation.');
+    expect(responseJson.eventId).to.equal(1);
+    expect(responseJson.likeCount).to.equal(0);
+    expect(responseJson.dislikeCount).to.equal(0);
+  });
+  
+  test("Comment ID should be assigned", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.id).to.be.a('number');
+    expect(responseJson.id).to.be.greaterThan(0);
+  });
+  
+  test("Created date should be properly formatted", function() {
+    const responseJson = res.getBody();
+    expect(responseJson.createdAt).to.be.a('string');
+    expect(responseJson.createdAt).to.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/);
+  });
+}
