@@ -2,6 +2,7 @@ package rs.raf.demo.resources;
 
 import rs.raf.demo.entities.User;
 import rs.raf.demo.requests.LoginRequest;
+import rs.raf.demo.requests.UserUpdateRequest;
 import rs.raf.demo.services.UserService;
 
 import javax.inject.Inject;
@@ -122,7 +123,7 @@ public class UserResource {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response update(@PathParam("id") Integer id, @Valid User user) {
+    public Response update(@PathParam("id") Integer id, @Valid UserUpdateRequest updateRequest) {
         if (!this.userService.existsById(id)) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "User not found");
@@ -131,16 +132,22 @@ public class UserResource {
 
         // Check if email is being changed and already exists for another user
         User existingUser = this.userService.findUser(id);
-        if (!existingUser.getEmail().equals(user.getEmail()) && this.userService.existsByEmail(user.getEmail())) {
+        if (!existingUser.getEmail().equals(updateRequest.getEmail()) && this.userService.existsByEmail(updateRequest.getEmail())) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Email already exists");
             return Response.status(Response.Status.CONFLICT).entity(response).build();
         }
 
         try {
+            // Convert UserUpdateRequest to User entity
+            User user = new User();
             user.setId(id);
-            // Don't update password through this endpoint - use separate password change endpoint
-            user.setHashedPassword(existingUser.getHashedPassword());
+            user.setEmail(updateRequest.getEmail());
+            user.setFirstName(updateRequest.getFirstName());
+            user.setLastName(updateRequest.getLastName());
+            user.setUserType(updateRequest.getUserType());
+            user.setStatus(existingUser.getStatus()); // Keep existing status
+            user.setHashedPassword(existingUser.getHashedPassword()); // Keep existing password
             
             User updatedUser = this.userService.updateUser(user);
             // Remove sensitive data

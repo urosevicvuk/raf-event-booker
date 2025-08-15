@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import type {User, UserFormData} from '../../types';
+import type {User, UserFormData, UserUpdateData} from '../../types';
 import './Form.css';
 
 interface UserFormProps {
   user?: User;
-  onSubmit: (data: UserFormData) => Promise<void>;
+  onSubmit: (data: UserFormData | UserUpdateData) => Promise<void>;
   onCancel: () => void;
   loading?: boolean;
 }
@@ -97,7 +97,19 @@ const UserForm: React.FC<UserFormProps> = ({
     }
 
     try {
-      await onSubmit(formData);
+      if (user) {
+        // For updates, exclude password fields
+        const updateData: UserUpdateData = {
+          email: formData.email,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          userType: formData.userType
+        };
+        await onSubmit(updateData);
+      } else {
+        // For creates, include password fields
+        await onSubmit(formData);
+      }
     } catch (error) {
       console.error('Form submission error:', error);
     }

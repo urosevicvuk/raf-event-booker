@@ -3,7 +3,7 @@ import EMSLayout from '../../components/ems/EMSLayout';
 import Table from '../../components/common/Table';
 import Modal from '../../components/common/Modal';
 import UserForm from '../../components/ems/UserForm';
-import type {User, UserFormData} from '../../types';
+import type {User, UserFormData, UserUpdateData} from '../../types';
 import UserService from '../../services/userService';
 import './UsersPage.css';
 
@@ -99,16 +99,16 @@ const UsersPage: React.FC = () => {
     }
   };
 
-  const handleFormSubmit = async (formData: UserFormData) => {
+  const handleFormSubmit = async (formData: UserFormData | UserUpdateData) => {
     try {
       setFormLoading(true);
       
       if (editingUser) {
-        // Remove password fields when editing
-        const { password: _password, confirmPassword: _confirmPassword, ...updateData } = formData;
-        await UserService.updateUser(editingUser.id, updateData);
+        // For updates, formData is already UserUpdateData type
+        await UserService.updateUser(editingUser.id, formData as UserUpdateData);
       } else {
-        await UserService.createUser(formData);
+        // For creates, formData is UserFormData type
+        await UserService.createUser(formData as UserFormData);
       }
       
       setModalOpen(false);

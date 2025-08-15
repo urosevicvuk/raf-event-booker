@@ -118,6 +118,13 @@ export interface UserFormData {
   confirmPassword?: string;
 }
 
+export interface UserUpdateData {
+  email: string;
+  firstName: string;
+  lastName: string;
+  userType: 'event creator' | 'admin';
+}
+
 export interface CommentFormData {
   authorName: string;
   text: string;

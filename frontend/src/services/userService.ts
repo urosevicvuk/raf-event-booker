@@ -1,5 +1,5 @@
 import axiosInstance from './api';
-import type {User, UserFormData} from '../types';
+import type {User, UserFormData, UserUpdateData} from '../types';
 
 export class UserService {
   static async getAllUsers(userType?: string, activeOnly: boolean = true): Promise<User[]> {
@@ -24,7 +24,7 @@ export class UserService {
     return response.data;
   }
 
-  static async updateUser(id: number, user: Partial<UserFormData>): Promise<User> {
+  static async updateUser(id: number, user: UserUpdateData): Promise<User> {
     const response = await axiosInstance.put<User>(`/users/${id}`, user);
     return response.data;
   }

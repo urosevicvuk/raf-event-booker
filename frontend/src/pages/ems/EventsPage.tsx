@@ -4,7 +4,7 @@ import EMSLayout from '../../components/ems/EMSLayout';
 import Table from '../../components/common/Table';
 import Modal from '../../components/common/Modal';
 import EventForm from '../../components/ems/EventForm';
-import type {Event, EventFormData} from '../../types';
+import type {Event, EventFormData, PaginatedResponse} from '../../types';
 import { useAuth } from '../../hooks/useAuth';
 import EventService from '../../services/eventService';
 
@@ -17,16 +17,33 @@ const EventsPage: React.FC = () => {
   const [editingEvent, setEditingEvent] = useState<Event | undefined>();
   const [formLoading, setFormLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageLimit] = useState(10);
 
   useEffect(() => {
     fetchEvents();
-  }, []);
+  }, [currentPage]);
 
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const data = await EventService.getAllEvents();
-      setEvents(data);
+      const response = await EventService.getEventsPaginated(currentPage, pageLimit);
+      
+      // Handle both possible response structures
+      if (response.events) {
+        setEvents(response.events);
+      } else if (response.items) {
+        setEvents(response.items);
+      } else {
+        setEvents([]);
+      }
+      
+      // Calculate total pages from total count
+      if (response.total) {
+        setTotalPages(Math.ceil(response.total / pageLimit));
+      }
     } catch (error) {
       console.error('Error fetching events:', error);
       alert('Error loading events');
@@ -53,6 +70,7 @@ const EventsPage: React.FC = () => {
     try {
       setDeleteLoading(event.id);
       await EventService.deleteEvent(event.id);
+      // Stay on current page after deletion
       await fetchEvents();
     } catch (error: any) {
       console.error('Error deleting event:', error);
@@ -80,7 +98,12 @@ const EventsPage: React.FC = () => {
       }
       
       setModalOpen(false);
-      await fetchEvents();
+      // Reset to page 1 when creating/updating to see the change
+      if (currentPage !== 1) {
+        setCurrentPage(1);
+      } else {
+        await fetchEvents();
+      }
     } catch (error: any) {
       console.error('Error saving event:', error);
       alert('Error saving event');
@@ -92,6 +115,10 @@ const EventsPage: React.FC = () => {
   const handleModalClose = () => {
     setModalOpen(false);
     setEditingEvent(undefined);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const formatDate = (dateString: string) => {
@@ -190,6 +217,9 @@ const EventsPage: React.FC = () => {
             columns={columns}
             loading={loading}
             emptyMessage="No events found. Create your first event!"
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
           />
         </div>
       </div>

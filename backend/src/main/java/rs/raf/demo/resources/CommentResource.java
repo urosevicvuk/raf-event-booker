@@ -1,6 +1,7 @@
 package rs.raf.demo.resources;
 
 import rs.raf.demo.entities.Comment;
+import rs.raf.demo.requests.CommentCreateRequest;
 import rs.raf.demo.services.CommentService;
 import rs.raf.demo.services.EventService;
 
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +32,22 @@ public class CommentResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response create(@Valid Comment comment) {
-        if (!this.eventService.existsById(comment.getEventId())) {
+    public Response create(@Valid CommentCreateRequest createRequest) {
+        if (!this.eventService.existsById(createRequest.getEventId())) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Event not found");
             return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
         }
+        
+        // Convert CommentCreateRequest to Comment entity
+        Comment comment = new Comment();
+        comment.setAuthorName(createRequest.getAuthorName());
+        comment.setText(createRequest.getText());
+        comment.setEventId(createRequest.getEventId());
+        comment.setCreatedAt(LocalDateTime.now()); // Set creation time automatically
+        comment.setLikeCount(0);
+        comment.setDislikeCount(0);
+        
         Comment savedComment = this.commentService.addComment(comment);
         return Response.status(Response.Status.CREATED).entity(savedComment).build();
     }

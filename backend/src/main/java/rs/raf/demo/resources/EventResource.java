@@ -2,6 +2,8 @@ package rs.raf.demo.resources;
 
 import rs.raf.demo.entities.Event;
 import rs.raf.demo.services.EventService;
+import rs.raf.demo.services.TagService;
+import rs.raf.demo.requests.EventUpdateRequest;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -9,6 +11,7 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +21,9 @@ public class EventResource {
 
     @Inject
     private EventService eventService;
+
+    @Inject
+    private TagService tagService;
 
     @Context
     private HttpServletRequest request;
@@ -68,7 +74,7 @@ public class EventResource {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response update(@PathParam("id") Integer id, @Valid Event event, @QueryParam("tags") String tagsString) {
+    public Response update(@PathParam("id") Integer id, @Valid EventUpdateRequest updateRequest) {
         if (!this.eventService.existsById(id)) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Event not found");
@@ -76,10 +82,19 @@ public class EventResource {
         }
         
         try {
+            // Convert EventUpdateRequest to Event entity
+            Event event = new Event();
             event.setId(id);
+            event.setTitle(updateRequest.getTitle());
+            event.setDescription(updateRequest.getDescription());
+            event.setEventDate(LocalDateTime.parse(updateRequest.getEventDate()));
+            event.setLocation(updateRequest.getLocation());
+            event.setCategoryId(updateRequest.getCategoryId());
+            event.setMaxCapacity(updateRequest.getMaxCapacity());
+            
             Event updatedEvent;
-            if (tagsString != null) {
-                updatedEvent = this.eventService.updateEventWithTags(event, tagsString);
+            if (updateRequest.getTags() != null && !updateRequest.getTags().trim().isEmpty()) {
+                updatedEvent = this.eventService.updateEventWithTags(event, updateRequest.getTags());
             } else {
                 updatedEvent = this.eventService.updateEvent(event);
                 // Still need to populate tags for response

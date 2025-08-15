@@ -1,4 +1,5 @@
 import React from 'react';
+import Pagination from './Pagination';
 import './Table.css';
 
 interface Column<T> {
@@ -12,13 +13,20 @@ interface TableProps<T> {
   columns: Column<T>[];
   loading?: boolean;
   emptyMessage?: string;
+  // Pagination props
+  currentPage?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
 }
 
 function Table<T extends { id: number }>({ 
   data, 
   columns, 
   loading = false, 
-  emptyMessage = 'No data available' 
+  emptyMessage = 'No data available',
+  currentPage,
+  totalPages,
+  onPageChange
 }: TableProps<T>) {
   if (loading) {
     return (
@@ -62,6 +70,15 @@ function Table<T extends { id: number }>({
           ))}
         </tbody>
       </table>
+      
+      {currentPage && totalPages && onPageChange && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          loading={loading}
+        />
+      )}
     </div>
   );
 }
