@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type {Event} from '../../types';
 import EventService from '../../services/eventService';
 import RSVPService from '../../services/rsvpService';
+import RSVPModal from './RSVPModal';
 import './EventInteractions.css';
 
 interface EventInteractionsProps {
@@ -22,6 +23,7 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
     isFull: false
   });
   const [rsvpLoading, setRsvpLoading] = useState(false);
+  const [rsvpModalOpen, setRsvpModalOpen] = useState(false);
   const [interactionLoading, setInteractionLoading] = useState(false);
 
   useEffect(() => {
@@ -150,24 +152,15 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
 
   const handleRSVP = async () => {
     if (rsvpLoading || rsvpStatus.isFull) return;
+    setRsvpModalOpen(true);
+  };
 
-    const email = prompt('Please enter your email to RSVP:');
-    if (!email || !email.trim()) return;
-
+  const handleRSVPSubmit = async (email: string) => {
+    setRsvpLoading(true);
     try {
-      setRsvpLoading(true);
-      await RSVPService.registerForEvent(event.id, email.trim());
+      await RSVPService.registerForEvent(event.id, email);
       await fetchRSVPStatus(); // Refresh status
-      alert('Successfully registered for this event!');
-    } catch (error: any) {
-      console.error('Error registering for event:', error);
-      if (error.response?.status === 409) {
-        alert('You are already registered for this event');
-      } else if (error.response?.status === 400) {
-        alert('Event is at full capacity');
-      } else {
-        alert('Error registering for event');
-      }
+      // Success message will be handled by the modal closing
     } finally {
       setRsvpLoading(false);
     }
@@ -245,6 +238,15 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
           )}
         </div>
       </div>
+
+      <RSVPModal
+        isOpen={rsvpModalOpen}
+        onClose={() => setRsvpModalOpen(false)}
+        onSubmit={handleRSVPSubmit}
+        eventTitle={event.title}
+        rsvpStatus={rsvpStatus}
+        loading={rsvpLoading}
+      />
     </div>
   );
 };

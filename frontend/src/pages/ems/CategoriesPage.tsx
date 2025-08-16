@@ -3,7 +3,7 @@ import EMSLayout from '../../components/ems/EMSLayout';
 import Table from '../../components/common/Table';
 import Modal from '../../components/common/Modal';
 import CategoryForm from '../../components/ems/CategoryForm';
-import type {Category, CategoryFormData, PaginatedResponse} from '../../types';
+import type {Category, CategoryFormData} from '../../types';
 import CategoryService from '../../services/categoryService';
 
 const CategoriesPage: React.FC = () => {

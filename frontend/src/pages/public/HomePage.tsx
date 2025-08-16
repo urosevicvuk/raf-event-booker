@@ -13,6 +13,9 @@ const HomePage: React.FC = () => {
   // Actual counts for display
   const [totalEventCount, setTotalEventCount] = useState(0);
   const [totalCategoryCount, setTotalCategoryCount] = useState(0);
+  // Category pagination
+  const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
+  const categoriesPerPage = 4;
 
   useEffect(() => {
     fetchData();
@@ -28,7 +31,7 @@ const HomePage: React.FC = () => {
       ]);
       
       setEvents(eventsData);
-      setCategories(categoriesData.slice(0, 6)); // Show only first 6 categories for display
+      setCategories(categoriesData); // Store all categories for pagination
       setTotalEventCount(eventCount.count); // Set actual total event count
       setTotalCategoryCount(categoriesData.length); // Set actual total category count
     } catch (error) {
@@ -40,6 +43,21 @@ const HomePage: React.FC = () => {
 
   const truncateDescription = (text: string, maxLength: number = 200) => {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
+
+  // Category pagination functions
+  const totalCategoryPages = Math.ceil(categories.length / categoriesPerPage);
+  const currentCategories = categories.slice(
+    currentCategoryPage * categoriesPerPage,
+    (currentCategoryPage + 1) * categoriesPerPage
+  );
+
+  const handlePrevCategories = () => {
+    setCurrentCategoryPage(prev => Math.max(0, prev - 1));
+  };
+
+  const handleNextCategories = () => {
+    setCurrentCategoryPage(prev => Math.min(totalCategoryPages - 1, prev + 1));
   };
 
   return (
@@ -86,20 +104,63 @@ const HomePage: React.FC = () => {
             <h2>Browse by Category</h2>
             <p>Find events that match your interests</p>
           </div>
-          <div className="categories-grid">
-            {categories.map((category, index) => (
-              <Link
-                key={category.id}
-                to={`/category/${category.id}`}
-                className="category-card"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="category-icon">📂</div>
-                <h3>{category.name}</h3>
-                <p>{category.description}</p>
-              </Link>
-            ))}
+          
+          <div className="categories-pagination-container">
+            {/* Left Arrow */}
+            <button
+              onClick={handlePrevCategories}
+              disabled={currentCategoryPage === 0}
+              className="category-nav-btn category-nav-prev"
+              style={{
+                opacity: currentCategoryPage === 0 ? 0.3 : 1,
+                cursor: currentCategoryPage === 0 ? 'not-allowed' : 'pointer'
+              }}
+            >
+              &#8249;
+            </button>
+
+            {/* Categories Row */}
+            <div className="categories-row">
+              {currentCategories.map((category, index) => (
+                <Link
+                  key={category.id}
+                  to={`/category/${category.id}`}
+                  className="category-card-horizontal"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="category-icon">📂</div>
+                  <h3>{category.name}</h3>
+                  <p>{category.description}</p>
+                </Link>
+              ))}
+            </div>
+
+            {/* Right Arrow */}
+            <button
+              onClick={handleNextCategories}
+              disabled={currentCategoryPage >= totalCategoryPages - 1}
+              className="category-nav-btn category-nav-next"
+              style={{
+                opacity: currentCategoryPage >= totalCategoryPages - 1 ? 0.3 : 1,
+                cursor: currentCategoryPage >= totalCategoryPages - 1 ? 'not-allowed' : 'pointer'
+              }}
+            >
+              &#8250;
+            </button>
           </div>
+
+          {/* Category pagination indicator */}
+          {totalCategoryPages > 1 && (
+            <div className="category-pagination-dots">
+              {Array.from({ length: totalCategoryPages }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentCategoryPage(i)}
+                  className={`pagination-dot ${i === currentCategoryPage ? 'active' : ''}`}
+                />
+              ))}
+            </div>
+          )}
         </section>
       )}
 
@@ -155,6 +216,9 @@ const HomePage: React.FC = () => {
                   <p className="event-description-modern">
                     {truncateDescription(event.description, 120)}
                   </p>
+                  <p className="created-at">
+                    {event.createdAt}
+                  </p>
 
                   {event.tags && event.tags.length > 0 && (
                     <div className="event-tags-modern">
@@ -164,7 +228,7 @@ const HomePage: React.FC = () => {
                           to={`/tag/${tag.id}`}
                           className="tag-modern"
                         >
-                          #{tag.name}
+                          #{tag.name} { }
                         </Link>
                       ))}
                       {event.tags.length > 3 && (
@@ -172,7 +236,6 @@ const HomePage: React.FC = () => {
                       )}
                     </div>
                   )}
-
                   <Link
                     to={`/event/${event.id}`}
                     className="event-link-modern"
@@ -184,11 +247,6 @@ const HomePage: React.FC = () => {
                   </Link>
                 </div>
 
-                {event.category && (
-                  <div className="event-category-badge">
-                    {event.category.name}
-                  </div>
-                )}
               </article>
             ))}
           </div>
