@@ -674,6 +674,31 @@ public class MySqlEventRepository extends MySqlAbstractRepository implements Eve
     }
 
     @Override
+    public int eventCount() {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+
+        int count = 0;
+        try {
+            connection = this.newConnection();
+
+            preparedStatement = connection.prepareStatement("SELECT COUNT(*) FROM event");
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                count = resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeStatement(preparedStatement);
+            this.closeConnection(connection);
+        }
+
+        return count;
+    }
+
+    @Override
     public int getCurrentRSVPCount(Integer eventId) {
         int count = 0;
         Connection connection = null;

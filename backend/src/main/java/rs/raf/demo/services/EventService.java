@@ -184,6 +184,10 @@ public class EventService {
         return event;
     }
 
+    public int eventCount() {
+        return this.eventRepository.eventCount();
+    }
+
     public List<Event> populateEventsWithTags(List<Event> events) {
         for (Event event : events) {
             List<Tag> tags = this.tagService.getTagsForEvent(event.getId());

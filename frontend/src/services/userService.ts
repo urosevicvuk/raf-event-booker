@@ -1,10 +1,22 @@
 import axiosInstance from './api';
-import type {User, UserFormData, UserUpdateData} from '../types';
+import type {User, UserFormData, UserUpdateData, PaginatedResponse} from '../types';
 
 export class UserService {
   static async getAllUsers(userType?: string, activeOnly: boolean = true): Promise<User[]> {
     const response = await axiosInstance.get<User[]>('/users', {
       params: { type: userType, active: activeOnly }
+    });
+    return response.data;
+  }
+
+  static async getUsersPaginated(
+    page: number = 1, 
+    limit: number = 10, 
+    userType?: string, 
+    activeOnly: boolean = true
+  ): Promise<PaginatedResponse<User>> {
+    const response = await axiosInstance.get<PaginatedResponse<User>>('/users/paginated', {
+      params: { page, limit, type: userType, active: activeOnly }
     });
     return response.data;
   }

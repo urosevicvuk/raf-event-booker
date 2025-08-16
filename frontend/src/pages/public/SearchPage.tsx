@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import PublicLayout from '../../components/public/PublicLayout';
+import Pagination from '../../components/common/Pagination';
 import type {Event} from '../../types';
 import EventService from '../../services/eventService';
 
@@ -11,61 +12,60 @@ const SearchPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState(initialQuery);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(false);
-  const [eventsLoading, setEventsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(!!initialQuery);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   
   const limit = 10;
 
   useEffect(() => {
     if (initialQuery) {
-      performSearch(initialQuery, 1, true);
+      performSearch(initialQuery);
     }
   }, [initialQuery]);
 
-  const performSearch = async (query: string, pageNum: number, reset: boolean = false) => {
+  useEffect(() => {
+    if (hasSearched && searchTerm.trim()) {
+      performSearch(searchTerm);
+    }
+  }, [currentPage]);
+
+  const performSearch = async (query: string) => {
     if (!query.trim()) return;
 
     try {
-      if (reset) setLoading(true);
-      else setEventsLoading(true);
+      setLoading(true);
       
-      const response = await EventService.searchEvents(query.trim(), pageNum, limit);
+      const response = await EventService.searchEvents(query.trim(), currentPage, limit);
       const newEvents = response.events || [];
       
-      if (reset) {
-        setEvents(newEvents);
-        setHasSearched(true);
-      } else {
-        setEvents(prev => [...prev, ...newEvents]);
-      }
+      setEvents(newEvents);
+      setHasSearched(true);
       
-      setHasMore(newEvents.length === limit);
-      setPage(pageNum);
+      // Calculate total pages from total count
+      if (response.total) {
+        setTotalPages(Math.ceil(response.total / limit));
+      }
     } catch (error) {
       console.error('Error searching events:', error);
-      if (reset) setEvents([]);
+      setEvents([]);
     } finally {
       setLoading(false);
-      setEventsLoading(false);
     }
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      setPage(1);
-      performSearch(searchTerm, 1, true);
+      setCurrentPage(1);
+      performSearch(searchTerm);
       // Update URL
       window.history.replaceState(null, '', `/search?q=${encodeURIComponent(searchTerm.trim())}`);
     }
   };
 
-  const handleLoadMore = () => {
-    if (searchTerm.trim()) {
-      performSearch(searchTerm, page + 1, false);
-    }
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const formatDate = (dateString: string) => {
@@ -224,24 +224,14 @@ const SearchPage: React.FC = () => {
               </div>
             ))}
 
-            {hasMore && (
-              <div style={{ padding: '30px', textAlign: 'center', borderTop: '1px solid #eee' }}>
-                <button
-                  onClick={handleLoadMore}
-                  disabled={eventsLoading}
-                  style={{
-                    background: '#3498db',
-                    color: 'white',
-                    border: 'none',
-                    padding: '12px 24px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '1rem',
-                    fontWeight: '500'
-                  }}
-                >
-                  {eventsLoading ? 'Loading...' : 'Load More Results'}
-                </button>
+            {totalPages > 1 && (
+              <div style={{ padding: '30px', borderTop: '1px solid #eee' }}>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                  loading={loading}
+                />
               </div>
             )}
           </>

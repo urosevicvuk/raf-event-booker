@@ -108,7 +108,7 @@ public class CommentResource {
         Boolean hasLiked = (Boolean) session.getAttribute(likedKey);
         Boolean hasDisliked = (Boolean) session.getAttribute(dislikedKey);
         
-        Map<String, String> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         
         if (Boolean.TRUE.equals(hasLiked)) {
             // Unlike - remove like
@@ -128,6 +128,13 @@ public class CommentResource {
             response.put("message", "Comment liked");
             response.put("action", "liked");
         }
+        
+        // Get updated comment with current counts
+        Comment updatedComment = this.commentService.findComment(commentId);
+        response.put("hasLiked", session.getAttribute(likedKey) != null);
+        response.put("hasDisliked", session.getAttribute(dislikedKey) != null);
+        response.put("likeCount", updatedComment.getLikeCount());
+        response.put("dislikeCount", updatedComment.getDislikeCount());
         
         return Response.ok(response).build();
     }
@@ -149,7 +156,7 @@ public class CommentResource {
         Boolean hasLiked = (Boolean) session.getAttribute(likedKey);
         Boolean hasDisliked = (Boolean) session.getAttribute(dislikedKey);
         
-        Map<String, String> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         
         if (Boolean.TRUE.equals(hasDisliked)) {
             // Remove dislike
@@ -169,6 +176,13 @@ public class CommentResource {
             response.put("message", "Comment disliked");
             response.put("action", "disliked");
         }
+        
+        // Get updated comment with current counts
+        Comment updatedComment = this.commentService.findComment(commentId);
+        response.put("hasLiked", session.getAttribute(likedKey) != null);
+        response.put("hasDisliked", session.getAttribute(dislikedKey) != null);
+        response.put("likeCount", updatedComment.getLikeCount());
+        response.put("dislikeCount", updatedComment.getDislikeCount());
         
         return Response.ok(response).build();
     }

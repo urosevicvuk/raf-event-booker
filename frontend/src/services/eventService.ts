@@ -109,6 +109,11 @@ export class EventService {
     return response.data;
   }
 
+  static async getEventCount(): Promise<{ count: number }> {
+    const response = await axiosInstance.get<{ count: number }>('/events/count');
+    return response.data;
+  }
+
   // Interactions
   static async incrementView(eventId: number): Promise<{ message: string }> {
     const response = await axiosInstance.post(`/events/${eventId}/view`);

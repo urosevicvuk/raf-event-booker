@@ -28,6 +28,41 @@ public class CategoryResource {
         return this.categoryService.allCategories();
     }
 
+    // Paginated categories endpoint
+    @GET
+    @Path("/paginated")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response allPaginated(@QueryParam("page") @DefaultValue("1") int page,
+                                @QueryParam("limit") @DefaultValue("10") int limit) {
+        try {
+            List<Category> allCategories = this.categoryService.allCategories();
+            
+            // Calculate pagination
+            int total = allCategories.size();
+            int offset = (page - 1) * limit;
+            int endIndex = Math.min(offset + limit, total);
+            
+            List<Category> paginatedCategories;
+            if (offset >= total) {
+                paginatedCategories = List.of(); // Empty list if page is beyond available data
+            } else {
+                paginatedCategories = allCategories.subList(offset, endIndex);
+            }
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("categories", paginatedCategories);
+            response.put("page", page);
+            response.put("limit", limit);
+            response.put("total", total);
+            
+            return Response.ok(response).build();
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Error retrieving categories: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+        }
+    }
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

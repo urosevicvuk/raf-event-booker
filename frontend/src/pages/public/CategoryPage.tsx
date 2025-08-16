@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import PublicLayout from '../../components/public/PublicLayout';
+import Pagination from '../../components/common/Pagination';
 import type {Event, Category} from '../../types';
 import EventService from '../../services/eventService';
 import CategoryService from '../../services/categoryService';
@@ -12,18 +13,17 @@ const CategoryPage: React.FC = () => {
   const [category, setCategory] = useState<Category | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [eventsLoading, setEventsLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   
   const limit = 10;
 
   useEffect(() => {
     if (categoryId) {
       fetchCategory();
-      fetchEvents(1, true);
+      fetchEvents();
     }
-  }, [categoryId]);
+  }, [categoryId, currentPage]);
 
   const fetchCategory = async () => {
     try {
@@ -35,33 +35,29 @@ const CategoryPage: React.FC = () => {
     }
   };
 
-  const fetchEvents = async (pageNum: number, reset: boolean = false) => {
+  const fetchEvents = async () => {
     try {
-      if (reset) setLoading(true);
-      else setEventsLoading(true);
+      setLoading(true);
       
-      const response = await EventService.getEventsByCategory(categoryId, pageNum, limit);
+      const response = await EventService.getEventsByCategory(categoryId, currentPage, limit);
       const newEvents = response.events || [];
       
-      if (reset) {
-        setEvents(newEvents);
-      } else {
-        setEvents(prev => [...prev, ...newEvents]);
-      }
+      setEvents(newEvents);
       
-      setHasMore(newEvents.length === limit);
-      setPage(pageNum);
+      // Calculate total pages from total count  
+      if (response.total) {
+        setTotalPages(Math.ceil(response.total / limit));
+      }
     } catch (error) {
       console.error('Error fetching events:', error);
-      if (reset) setEvents([]);
+      setEvents([]);
     } finally {
       setLoading(false);
-      setEventsLoading(false);
     }
   };
 
-  const handleLoadMore = () => {
-    fetchEvents(page + 1, false);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const formatDate = (dateString: string) => {
@@ -173,24 +169,14 @@ const CategoryPage: React.FC = () => {
               </div>
             ))}
 
-            {hasMore && (
-              <div style={{ padding: '30px', textAlign: 'center', borderTop: '1px solid #eee' }}>
-                <button
-                  onClick={handleLoadMore}
-                  disabled={eventsLoading}
-                  style={{
-                    background: '#3498db',
-                    color: 'white',
-                    border: 'none',
-                    padding: '12px 24px',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '1rem',
-                    fontWeight: '500'
-                  }}
-                >
-                  {eventsLoading ? 'Loading...' : 'Load More Events'}
-                </button>
+            {totalPages > 1 && (
+              <div style={{ padding: '30px', borderTop: '1px solid #eee' }}>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                  loading={loading}
+                />
               </div>
             )}
           </>

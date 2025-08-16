@@ -3,7 +3,7 @@ import EMSLayout from '../../components/ems/EMSLayout';
 import Table from '../../components/common/Table';
 import Modal from '../../components/common/Modal';
 import CategoryForm from '../../components/ems/CategoryForm';
-import type {Category, CategoryFormData} from '../../types';
+import type {Category, CategoryFormData, PaginatedResponse} from '../../types';
 import CategoryService from '../../services/categoryService';
 
 const CategoriesPage: React.FC = () => {
@@ -13,16 +13,33 @@ const CategoriesPage: React.FC = () => {
   const [editingCategory, setEditingCategory] = useState<Category | undefined>();
   const [formLoading, setFormLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageLimit] = useState(10);
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [currentPage]);
 
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const data = await CategoryService.getAllCategories();
-      setCategories(data);
+      const response = await CategoryService.getCategoriesPaginated(currentPage, pageLimit);
+      
+      // Handle response structure
+      if (response.categories) {
+        setCategories(response.categories);
+      } else if (response.items) {
+        setCategories(response.items);
+      } else {
+        setCategories([]);
+      }
+      
+      // Calculate total pages from total count
+      if (response.total) {
+        setTotalPages(Math.ceil(response.total / pageLimit));
+      }
     } catch (error) {
       console.error('Error fetching categories:', error);
       alert('Error loading categories');
@@ -91,6 +108,10 @@ const CategoriesPage: React.FC = () => {
     setEditingCategory(undefined);
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const columns = [
     { key: 'name' as const, label: 'Name' },
     { key: 'description' as const, label: 'Description' },
@@ -138,6 +159,9 @@ const CategoriesPage: React.FC = () => {
             columns={columns}
             loading={loading}
             emptyMessage="No categories found. Create your first category!"
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
           />
         </div>
       </div>

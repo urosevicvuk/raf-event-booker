@@ -7,7 +7,7 @@ export class CommentService {
     page: number = 1, 
     limit: number = 10
   ): Promise<PaginatedResponse<Comment>> {
-    const response = await axiosInstance.get<PaginatedResponse<Comment>>(`/comments/event/${eventId}`, {
+    const response = await axiosInstance.get<PaginatedResponse<Comment>>(`/comments/event/${eventId}/paginated`, {
       params: { page, limit }
     });
     return response.data;

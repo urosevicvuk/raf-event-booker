@@ -12,6 +12,8 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +38,16 @@ public class EventResource {
         // Populate events with tags for EMS
         events = this.eventService.populateEventsWithTags(events);
         return Response.ok(events).build();
+    }
+
+    @GET
+    @Path("/count")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response count() {
+        int count = this.eventService.eventCount();
+        Map<String, Object> response = new HashMap<>();
+        response.put("count", count);
+        return Response.ok(response).build();
     }
 
     @POST
@@ -87,7 +99,15 @@ public class EventResource {
             event.setId(id);
             event.setTitle(updateRequest.getTitle());
             event.setDescription(updateRequest.getDescription());
-            event.setEventDate(LocalDateTime.parse(updateRequest.getEventDate()));
+            // Parse ISO date string properly (handles "2024-01-01T12:00:00.000Z" format)
+            LocalDateTime eventDate;
+            try {
+                eventDate = OffsetDateTime.parse(updateRequest.getEventDate()).toLocalDateTime();
+            } catch (Exception e) {
+                // Fallback to direct parsing if it's already in LocalDateTime format
+                eventDate = LocalDateTime.parse(updateRequest.getEventDate());
+            }
+            event.setEventDate(eventDate);
             event.setLocation(updateRequest.getLocation());
             event.setCategoryId(updateRequest.getCategoryId());
             event.setMaxCapacity(updateRequest.getMaxCapacity());
@@ -131,11 +151,13 @@ public class EventResource {
                                    @QueryParam("limit") @DefaultValue("10") int limit) {
         int offset = (page - 1) * limit;
         List<Event> events = this.eventService.allEventsPaginated(offset, limit);
+        List<Event> allEvents = this.eventService.allEvents(); // Get total count
         
         Map<String, Object> response = new HashMap<>();
         response.put("events", events);
         response.put("page", page);
         response.put("limit", limit);
+        response.put("total", allEvents.size()); // Add total count
         return Response.ok(response).build();
     }
 
@@ -153,11 +175,13 @@ public class EventResource {
         }
 
         List<Event> events;
+        List<Event> allSearchResults = this.eventService.searchEventsByTitleOrDescription(searchTerm.trim()); // Get total count
+        
         if (page > 0 && limit > 0) {
             int offset = (page - 1) * limit;
             events = this.eventService.searchEventsByTitleOrDescriptionPaginated(searchTerm.trim(), offset, limit);
         } else {
-            events = this.eventService.searchEventsByTitleOrDescription(searchTerm.trim());
+            events = allSearchResults;
         }
 
         Map<String, Object> response = new HashMap<>();
@@ -165,6 +189,7 @@ public class EventResource {
         response.put("searchTerm", searchTerm.trim());
         response.put("page", page);
         response.put("limit", limit);
+        response.put("total", allSearchResults.size()); // Add total count
         return Response.ok(response).build();
     }
 
@@ -175,12 +200,14 @@ public class EventResource {
     public Response getEventsByCategory(@PathParam("categoryId") Integer categoryId,
                                        @QueryParam("page") @DefaultValue("1") int page,
                                        @QueryParam("limit") @DefaultValue("10") int limit) {
+        List<Event> allCategoryEvents = this.eventService.findEventsByCategory(categoryId); // Get total count
         List<Event> events;
+        
         if (page > 0 && limit > 0) {
             int offset = (page - 1) * limit;
             events = this.eventService.findEventsByCategoryPaginated(categoryId, offset, limit);
         } else {
-            events = this.eventService.findEventsByCategory(categoryId);
+            events = allCategoryEvents;
         }
 
         Map<String, Object> response = new HashMap<>();
@@ -188,6 +215,7 @@ public class EventResource {
         response.put("categoryId", categoryId);
         response.put("page", page);
         response.put("limit", limit);
+        response.put("total", allCategoryEvents.size()); // Add total count
         return Response.ok(response).build();
     }
 
@@ -198,12 +226,14 @@ public class EventResource {
     public Response getEventsByTag(@PathParam("tagId") Integer tagId,
                                   @QueryParam("page") @DefaultValue("1") int page,
                                   @QueryParam("limit") @DefaultValue("10") int limit) {
+        List<Event> allTagEvents = this.eventService.findEventsByTag(tagId); // Get total count
         List<Event> events;
+        
         if (page > 0 && limit > 0) {
             int offset = (page - 1) * limit;
             events = this.eventService.findEventsByTagPaginated(tagId, offset, limit);
         } else {
-            events = this.eventService.findEventsByTag(tagId);
+            events = allTagEvents;
         }
 
         Map<String, Object> response = new HashMap<>();
@@ -211,6 +241,7 @@ public class EventResource {
         response.put("tagId", tagId);
         response.put("page", page);
         response.put("limit", limit);
+        response.put("total", allTagEvents.size()); // Add total count
         return Response.ok(response).build();
     }
 

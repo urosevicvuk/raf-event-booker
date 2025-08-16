@@ -10,6 +10,9 @@ const HomePage: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  // Actual counts for display
+  const [totalEventCount, setTotalEventCount] = useState(0);
+  const [totalCategoryCount, setTotalCategoryCount] = useState(0);
 
   useEffect(() => {
     fetchData();
@@ -18,12 +21,16 @@ const HomePage: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [eventsData, categoriesData] = await Promise.all([
-        EventService.getLatestEvents(8),
-        CategoryService.getAllCategories()
+      const [eventsData, categoriesData, eventCount] = await Promise.all([
+        EventService.getLatestEvents(10), // Show 10 most recent events
+        CategoryService.getAllCategories(),
+        EventService.getEventCount() // Get actual total count
       ]);
+      
       setEvents(eventsData);
-      setCategories(categoriesData.slice(0, 6)); // Show only first 6 categories
+      setCategories(categoriesData.slice(0, 6)); // Show only first 6 categories for display
+      setTotalEventCount(eventCount.count); // Set actual total event count
+      setTotalCategoryCount(categoriesData.length); // Set actual total category count
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -58,11 +65,11 @@ const HomePage: React.FC = () => {
         </div>
         <div className="hero-stats">
           <div className="stat-card">
-            <div className="stat-number">{events.length}</div>
+            <div className="stat-number">{totalEventCount}</div>
             <div className="stat-label">Active Events</div>
           </div>
           <div className="stat-card">
-            <div className="stat-number">{categories.length}</div>
+            <div className="stat-number">{totalCategoryCount}</div>
             <div className="stat-label">Categories</div>
           </div>
           <div className="stat-card">
@@ -140,8 +147,8 @@ const HomePage: React.FC = () => {
                   </h3>
 
                   <div className="event-meta-modern">
-                    <span>📍 {event.location}</span> {}
-                    <span>👁 {event.views}</span> {}
+                    <span>📍 {event.location}</span>
+                    <span>👁 {event.views}</span>
                     <span>👍 {event.likeCount}</span>
                   </div>
 

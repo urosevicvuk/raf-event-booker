@@ -84,17 +84,21 @@ const EventsPage: React.FC = () => {
     try {
       setFormLoading(true);
       
-      // Convert datetime-local format back to ISO format
-      const eventData = {
-        ...formData,
-        eventDate: new Date(formData.eventDate).toISOString(),
-        authorId: user!.id // Current user is the author
-      };
-      
       if (editingEvent) {
-        await EventService.updateEvent(editingEvent.id, eventData);
+        // For updates, don't include authorId (author shouldn't change)
+        const updateData = {
+          ...formData,
+          eventDate: new Date(formData.eventDate).toISOString()
+        };
+        await EventService.updateEvent(editingEvent.id, updateData);
       } else {
-        await EventService.createEvent(eventData);
+        // For creates, include authorId
+        const createData = {
+          ...formData,
+          eventDate: new Date(formData.eventDate).toISOString(),
+          authorId: user!.id // Current user is the author
+        };
+        await EventService.createEvent(createData);
       }
       
       setModalOpen(false);

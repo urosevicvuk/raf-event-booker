@@ -64,6 +64,53 @@ public class UserResource {
         }
     }
 
+    // Paginated users endpoint
+    @GET
+    @Path("/paginated")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response allPaginated(@QueryParam("page") @DefaultValue("1") int page,
+                                @QueryParam("limit") @DefaultValue("10") int limit,
+                                @QueryParam("type") String userType,
+                                @QueryParam("active") @DefaultValue("true") boolean activeOnly) {
+        try {
+            List<User> allUsers;
+            if (userType != null && !userType.trim().isEmpty()) {
+                allUsers = this.userService.findUsersByType(userType);
+            } else if (activeOnly) {
+                allUsers = this.userService.findActiveUsers();
+            } else {
+                allUsers = this.userService.allUsers();
+            }
+            
+            // Calculate pagination
+            int total = allUsers.size();
+            int offset = (page - 1) * limit;
+            int endIndex = Math.min(offset + limit, total);
+            
+            List<User> paginatedUsers;
+            if (offset >= total) {
+                paginatedUsers = List.of(); // Empty list if page is beyond available data
+            } else {
+                paginatedUsers = allUsers.subList(offset, endIndex);
+            }
+            
+            // Remove sensitive data
+            paginatedUsers.forEach(user -> user.setHashedPassword(null));
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("users", paginatedUsers);
+            response.put("page", page);
+            response.put("limit", limit);
+            response.put("total", total);
+            
+            return Response.ok(response).build();
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Error retrieving users: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+        }
+    }
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

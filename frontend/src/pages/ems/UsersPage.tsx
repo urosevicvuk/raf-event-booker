@@ -3,7 +3,7 @@ import EMSLayout from '../../components/ems/EMSLayout';
 import Table from '../../components/common/Table';
 import Modal from '../../components/common/Modal';
 import UserForm from '../../components/ems/UserForm';
-import type {User, UserFormData, UserUpdateData} from '../../types';
+import type {User, UserFormData, UserUpdateData, PaginatedResponse} from '../../types';
 import UserService from '../../services/userService';
 import './UsersPage.css';
 
@@ -14,16 +14,33 @@ const UsersPage: React.FC = () => {
   const [editingUser, setEditingUser] = useState<User | undefined>();
   const [formLoading, setFormLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<{ userId: number; action: string } | null>(null);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageLimit] = useState(10);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [currentPage]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const data = await UserService.getAllUsers(undefined, false); // Get all users (active + inactive)
-      setUsers(data);
+      const response = await UserService.getUsersPaginated(currentPage, pageLimit, undefined, false); // Get all users (active + inactive)
+      
+      // Handle response structure
+      if (response.users) {
+        setUsers(response.users);
+      } else if (response.items) {
+        setUsers(response.items);
+      } else {
+        setUsers([]);
+      }
+      
+      // Calculate total pages from total count
+      if (response.total) {
+        setTotalPages(Math.ceil(response.total / pageLimit));
+      }
     } catch (error) {
       console.error('Error fetching users:', error);
       alert('Error loading users');

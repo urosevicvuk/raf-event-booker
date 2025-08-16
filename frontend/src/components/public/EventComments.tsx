@@ -18,6 +18,8 @@ const EventComments: React.FC<EventCommentsProps> = ({ eventId }) => {
     authorName: '',
     text: ''
   });
+  // Track like/dislike status for each comment
+  const [commentLikeStatus, setCommentLikeStatus] = useState<Record<number, { hasLiked: boolean; hasDisliked: boolean }>>({});
 
   const limit = 10;
 
@@ -78,33 +80,25 @@ const EventComments: React.FC<EventCommentsProps> = ({ eventId }) => {
 
     try {
       setInteractionLoading(commentId);
-      await CommentService.likeComment(commentId);
+      const response = await CommentService.likeComment(commentId);
       
-      // Update local state
+      // Update like/dislike status from backend
+      setCommentLikeStatus(prev => ({
+        ...prev,
+        [commentId]: {
+          hasLiked: response.hasLiked,
+          hasDisliked: response.hasDisliked
+        }
+      }));
+      
+      // Update local state with response from backend
       setComments(prev => prev.map(comment => {
         if (comment.id === commentId) {
-          const likeKey = `liked_comment_${commentId}`;
-          const dislikeKey = `disliked_comment_${commentId}`;
-          const hasLiked = !!sessionStorage.getItem(likeKey);
-          const hasDisliked = !!sessionStorage.getItem(dislikeKey);
-          
-          if (hasLiked) {
-            // Remove like
-            sessionStorage.removeItem(likeKey);
-            return { ...comment, likeCount: comment.likeCount - 1 };
-          } else {
-            // Add like, remove dislike if exists
-            sessionStorage.setItem(likeKey, 'true');
-            if (hasDisliked) {
-              sessionStorage.removeItem(dislikeKey);
-              return { 
-                ...comment, 
-                likeCount: comment.likeCount + 1, 
-                dislikeCount: comment.dislikeCount - 1 
-              };
-            }
-            return { ...comment, likeCount: comment.likeCount + 1 };
-          }
+          return { 
+            ...comment, 
+            likeCount: response.likeCount,
+            dislikeCount: response.dislikeCount
+          };
         }
         return comment;
       }));
@@ -120,33 +114,25 @@ const EventComments: React.FC<EventCommentsProps> = ({ eventId }) => {
 
     try {
       setInteractionLoading(commentId);
-      await CommentService.dislikeComment(commentId);
+      const response = await CommentService.dislikeComment(commentId);
       
-      // Update local state
+      // Update like/dislike status from backend
+      setCommentLikeStatus(prev => ({
+        ...prev,
+        [commentId]: {
+          hasLiked: response.hasLiked,
+          hasDisliked: response.hasDisliked
+        }
+      }));
+      
+      // Update local state with response from backend
       setComments(prev => prev.map(comment => {
         if (comment.id === commentId) {
-          const likeKey = `liked_comment_${commentId}`;
-          const dislikeKey = `disliked_comment_${commentId}`;
-          const hasLiked = !!sessionStorage.getItem(likeKey);
-          const hasDisliked = !!sessionStorage.getItem(dislikeKey);
-          
-          if (hasDisliked) {
-            // Remove dislike
-            sessionStorage.removeItem(dislikeKey);
-            return { ...comment, dislikeCount: comment.dislikeCount - 1 };
-          } else {
-            // Add dislike, remove like if exists
-            sessionStorage.setItem(dislikeKey, 'true');
-            if (hasLiked) {
-              sessionStorage.removeItem(likeKey);
-              return { 
-                ...comment, 
-                dislikeCount: comment.dislikeCount + 1, 
-                likeCount: comment.likeCount - 1 
-              };
-            }
-            return { ...comment, dislikeCount: comment.dislikeCount + 1 };
-          }
+          return { 
+            ...comment, 
+            likeCount: response.likeCount,
+            dislikeCount: response.dislikeCount
+          };
         }
         return comment;
       }));
@@ -168,11 +154,11 @@ const EventComments: React.FC<EventCommentsProps> = ({ eventId }) => {
   };
 
   const isCommentLiked = (commentId: number) => {
-    return !!sessionStorage.getItem(`liked_comment_${commentId}`);
+    return commentLikeStatus[commentId]?.hasLiked || false;
   };
 
   const isCommentDisliked = (commentId: number) => {
-    return !!sessionStorage.getItem(`disliked_comment_${commentId}`);
+    return commentLikeStatus[commentId]?.hasDisliked || false;
   };
 
   return (
@@ -234,15 +220,17 @@ const EventComments: React.FC<EventCommentsProps> = ({ eventId }) => {
                 <div className="comment-actions">
                   <button
                     onClick={() => handleLikeComment(comment.id)}
-                    className={`comment-reaction-btn ${isCommentLiked(comment.id) ? 'active' : ''}`}
+                    className={`comment-reaction-btn like-btn ${isCommentLiked(comment.id) ? 'active' : ''}`}
                     disabled={interactionLoading === comment.id}
+                    title={isCommentLiked(comment.id) ? 'Remove like' : 'Like this comment'}
                   >
                     👍 {comment.likeCount}
                   </button>
                   <button
                     onClick={() => handleDislikeComment(comment.id)}
-                    className={`comment-reaction-btn ${isCommentDisliked(comment.id) ? 'active' : ''}`}
+                    className={`comment-reaction-btn dislike-btn ${isCommentDisliked(comment.id) ? 'active' : ''}`}
                     disabled={interactionLoading === comment.id}
+                    title={isCommentDisliked(comment.id) ? 'Remove dislike' : 'Dislike this comment'}
                   >
                     👎 {comment.dislikeCount}
                   </button>

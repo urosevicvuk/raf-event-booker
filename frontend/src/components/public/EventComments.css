@@ -164,6 +164,33 @@
   color: var(--primary);
 }
 
+/* Green active state for like button */
+.comment-reaction-btn.active.like-btn {
+  background: var(--success);
+  border-color: var(--success);
+  color: var(--white);
+}
+
+/* Red active state for dislike button */
+.comment-reaction-btn.active.dislike-btn {
+  background: var(--error);
+  border-color: var(--error);
+  color: var(--white);
+}
+
+/* Hover states for like/dislike */
+.comment-reaction-btn.like-btn:hover:not(:disabled):not(.active) {
+  border-color: var(--success);
+  background: #f0fdf4;
+  color: var(--success);
+}
+
+.comment-reaction-btn.dislike-btn:hover:not(:disabled):not(.active) {
+  border-color: var(--error);
+  background: #fef2f2;
+  color: var(--error);
+}
+
 .load-more-section {
   padding: var(--space-6);
   text-align: center;
