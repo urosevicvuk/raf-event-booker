@@ -292,7 +292,7 @@ public class MySqlEventRepository extends MySqlAbstractRepository implements Eve
         try {
             connection = this.newConnection();
 
-            preparedStatement = connection.prepareStatement("SELECT * FROM event WHERE category_id = ? ORDER BY created_at DESC");
+            preparedStatement = connection.prepareStatement("SELECT * FROM event WHERE category_id = ? ORDER BY event_date ASC");
             preparedStatement.setInt(1, categoryId);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -321,7 +321,7 @@ public class MySqlEventRepository extends MySqlAbstractRepository implements Eve
             connection = this.newConnection();
 
             preparedStatement = connection.prepareStatement(
-                "SELECT * FROM event WHERE category_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?");
+                "SELECT * FROM event WHERE category_id = ? ORDER BY event_date ASC LIMIT ? OFFSET ?");
             preparedStatement.setInt(1, categoryId);
             preparedStatement.setInt(2, limit);
             preparedStatement.setInt(3, offset);

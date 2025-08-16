@@ -79,6 +79,8 @@ public class EventResource {
             response.put("message", "Event not found");
             return Response.status(Response.Status.NOT_FOUND).entity(response).build();
         }
+        // Populate with complete data including category and author
+        event = this.eventService.populateEventWithCompleteData(event);
         return Response.ok(event).build();
     }
 
@@ -168,28 +170,42 @@ public class EventResource {
     public Response searchEvents(@QueryParam("q") String searchTerm,
                                 @QueryParam("page") @DefaultValue("1") int page,
                                 @QueryParam("limit") @DefaultValue("10") int limit) {
-        if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Search term is required");
-            return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
-        }
-
         List<Event> events;
-        List<Event> allSearchResults = this.eventService.searchEventsByTitleOrDescription(searchTerm.trim()); // Get total count
+        List<Event> allResults;
+        String actualSearchTerm = "";
         
-        if (page > 0 && limit > 0) {
-            int offset = (page - 1) * limit;
-            events = this.eventService.searchEventsByTitleOrDescriptionPaginated(searchTerm.trim(), offset, limit);
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            // Return all events when no search term provided
+            allResults = this.eventService.allEvents(); // Get total count
+            
+            if (page > 0 && limit > 0) {
+                int offset = (page - 1) * limit;
+                events = this.eventService.allEventsPaginated(offset, limit);
+            } else {
+                events = allResults;
+            }
         } else {
-            events = allSearchResults;
+            // Search with the provided term
+            actualSearchTerm = searchTerm.trim();
+            allResults = this.eventService.searchEventsByTitleOrDescription(actualSearchTerm); // Get total count
+            
+            if (page > 0 && limit > 0) {
+                int offset = (page - 1) * limit;
+                events = this.eventService.searchEventsByTitleOrDescriptionPaginated(actualSearchTerm, offset, limit);
+            } else {
+                events = allResults;
+            }
         }
 
+        // Populate complete data for search results
+        events = this.eventService.populateEventsWithCompleteData(events);
+        
         Map<String, Object> response = new HashMap<>();
         response.put("events", events);
-        response.put("searchTerm", searchTerm.trim());
+        response.put("searchTerm", actualSearchTerm);
         response.put("page", page);
         response.put("limit", limit);
-        response.put("total", allSearchResults.size()); // Add total count
+        response.put("total", allResults.size()); // Add total count
         return Response.ok(response).build();
     }
 
@@ -210,6 +226,9 @@ public class EventResource {
             events = allCategoryEvents;
         }
 
+        // Populate complete data for category events
+        events = this.eventService.populateEventsWithCompleteData(events);
+        
         Map<String, Object> response = new HashMap<>();
         response.put("events", events);
         response.put("categoryId", categoryId);
@@ -236,6 +255,9 @@ public class EventResource {
             events = allTagEvents;
         }
 
+        // Populate complete data for tag events
+        events = this.eventService.populateEventsWithCompleteData(events);
+        
         Map<String, Object> response = new HashMap<>();
         response.put("events", events);
         response.put("tagId", tagId);
@@ -260,6 +282,7 @@ public class EventResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLatestEvents(@QueryParam("limit") @DefaultValue("10") int limit) {
         List<Event> events = this.eventService.findLatestEvents(limit);
+        events = this.eventService.populateEventsWithCompleteData(events);
         return Response.ok(events).build();
     }
 
@@ -268,6 +291,7 @@ public class EventResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMostVisitedEvents(@QueryParam("limit") @DefaultValue("10") int limit) {
         List<Event> events = this.eventService.findMostVisitedEvents(limit);
+        events = this.eventService.populateEventsWithCompleteData(events);
         return Response.ok(events).build();
     }
 
@@ -276,6 +300,7 @@ public class EventResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMostVisitedEventsLast30Days(@QueryParam("limit") @DefaultValue("10") int limit) {
         List<Event> events = this.eventService.findMostVisitedEventsLast30Days(limit);
+        events = this.eventService.populateEventsWithCompleteData(events);
         return Response.ok(events).build();
     }
 
@@ -284,6 +309,7 @@ public class EventResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMostReactedEvents(@QueryParam("limit") @DefaultValue("3") int limit) {
         List<Event> events = this.eventService.findMostReactedEvents(limit);
+        events = this.eventService.populateEventsWithCompleteData(events);
         return Response.ok(events).build();
     }
 
@@ -299,6 +325,7 @@ public class EventResource {
         }
 
         List<Event> events = this.eventService.findSimilarEvents(eventId, limit);
+        events = this.eventService.populateEventsWithCompleteData(events);
         return Response.ok(events).build();
     }
 

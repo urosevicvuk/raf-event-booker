@@ -1,7 +1,9 @@
 package rs.raf.demo.services;
 
+import rs.raf.demo.entities.Category;
 import rs.raf.demo.entities.Event;
 import rs.raf.demo.entities.Tag;
+import rs.raf.demo.entities.User;
 import rs.raf.demo.repositories.event.EventRepository;
 
 import javax.inject.Inject;
@@ -19,6 +21,12 @@ public class EventService {
     
     @Inject
     private TagService tagService;
+    
+    @Inject
+    private CategoryService categoryService;
+    
+    @Inject
+    private UserService userService;
 
     public Event addEvent(Event event) {
         // Set creation time if not set
@@ -192,6 +200,35 @@ public class EventService {
         for (Event event : events) {
             List<Tag> tags = this.tagService.getTagsForEvent(event.getId());
             event.setTags(tags);
+        }
+        return events;
+    }
+    
+    public Event populateEventWithCompleteData(Event event) {
+        if (event == null) return null;
+        
+        // Populate category
+        if (event.getCategoryId() != null) {
+            Category category = this.categoryService.findCategory(event.getCategoryId());
+            event.setCategory(category);
+        }
+        
+        // Populate author
+        if (event.getAuthorId() != null) {
+            User author = this.userService.findUser(event.getAuthorId());
+            event.setAuthor(author);
+        }
+        
+        // Populate tags
+        List<Tag> tags = this.tagService.getTagsForEvent(event.getId());
+        event.setTags(tags);
+        
+        return event;
+    }
+    
+    public List<Event> populateEventsWithCompleteData(List<Event> events) {
+        for (Event event : events) {
+            populateEventWithCompleteData(event);
         }
         return events;
     }
