@@ -5,17 +5,17 @@ meta {
 }
 
 put {
-  url: http://localhost:8081/api/events/{{testEventId}}
+  url: http://localhost:8081/api/events/4
   body: json
   auth: bearer
 }
 
-auth:bearer {
-  token: {{authToken}}
-}
-
 headers {
   Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{authToken}}
 }
 
 body:json {

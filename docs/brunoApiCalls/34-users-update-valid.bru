@@ -5,17 +5,17 @@ meta {
 }
 
 put {
-  url: http://localhost:8081/api/users/{{newUserId}}
+  url: http://localhost:8081/api/users/3
   body: json
   auth: bearer
 }
 
-auth:bearer {
-  token: {{authToken}}
-}
-
 headers {
   Content-Type: application/json
+}
+
+auth:bearer {
+  token: {{authToken}}
 }
 
 body:json {
@@ -24,7 +24,8 @@ body:json {
     "firstName": "Bruno",
     "lastName": "Updated",
     "userType": "event creator",
-    "status": "inactive"
+    "status": "inactive",
+    "hashedPassword": "admin123"
   }
 }
 
