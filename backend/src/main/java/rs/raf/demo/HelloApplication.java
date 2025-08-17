@@ -5,9 +5,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 
 // Repository imports
-import rs.raf.demo.repositories.subject.InMemorySubjectRepository;
-import rs.raf.demo.repositories.subject.MySqlSubjectRepository;
-import rs.raf.demo.repositories.subject.SubjectRepository;
 import rs.raf.demo.repositories.user.MySqlUserRepository;
 import rs.raf.demo.repositories.user.UserRepository;
 import rs.raf.demo.repositories.category.CategoryRepository;
@@ -24,7 +21,6 @@ import rs.raf.demo.repositories.rsvp.RSVPRepository;
 import rs.raf.demo.repositories.rsvp.MySqlRSVPRepository;
 
 // Service imports
-import rs.raf.demo.services.SubjectService;
 import rs.raf.demo.services.UserService;
 import rs.raf.demo.services.CategoryService;
 import rs.raf.demo.services.EventService;
@@ -50,7 +46,6 @@ public class HelloApplication extends ResourceConfig {
             @Override
             protected void configure() {
                 // Repository bindings - use MySQL implementations
-                this.bind(MySqlSubjectRepository.class).to(SubjectRepository.class).in(Singleton.class);
                 this.bind(MySqlUserRepository.class).to(UserRepository.class).in(Singleton.class);
                 this.bind(MySqlCategoryRepository.class).to(CategoryRepository.class).in(Singleton.class);
                 this.bind(MySqlEventRepository.class).to(EventRepository.class).in(Singleton.class);
@@ -60,7 +55,6 @@ public class HelloApplication extends ResourceConfig {
                 this.bind(MySqlRSVPRepository.class).to(RSVPRepository.class).in(Singleton.class);
 
                 // Service bindings
-                this.bindAsContract(SubjectService.class);
                 this.bindAsContract(UserService.class);
                 this.bindAsContract(CategoryService.class);
                 this.bindAsContract(EventService.class);

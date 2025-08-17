@@ -110,10 +110,6 @@ public class AuthFilter implements ContainerRequestFilter {
                 return method.equals("POST") || method.equals("PUT") || method.equals("DELETE");
             }
             
-            // Protect ALL SubjectResource endpoints (original behavior)
-            if (matchedResource instanceof SubjectResource) {
-                return true;
-            }
         }
 
         return false;
