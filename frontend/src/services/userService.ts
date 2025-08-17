@@ -73,4 +73,4 @@ export class UserService {
   }
 }
 
-export default UserService;
+// Removed default export for consistency

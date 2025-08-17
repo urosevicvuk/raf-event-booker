@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import PublicLayout from '../../components/public/PublicLayout';
 import type {Event, Tag} from '../../types';
-import EventService from '../../services/eventService';
-import TagService from '../../services/tagService';
+import {EventService} from '../../services/eventService';
+import {TagService} from '../../services/tagService';
 
 const TagPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

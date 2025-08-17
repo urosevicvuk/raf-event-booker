@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import type {Event} from '../../types';
-import EventService from '../../services/eventService';
+import {EventService} from '../../services/eventService';
 
 const MostReactedSidebar: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);

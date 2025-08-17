@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import EMSLayout from '../../components/ems/EMSLayout';
 import Table from '../../components/common/Table';
 import type {Event} from '../../types';
-import EventService from '../../services/eventService';
+import {EventService} from '../../services/eventService';
+import {extractResponseData, handleApiError} from '../../services/api';
 import './SearchPage.css';
 
 const EventSearchPage: React.FC = () => {
@@ -25,13 +26,14 @@ const EventSearchPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await EventService.searchEvents(searchTerm.trim(), page, limit);
-      setEvents(response.events || []);
+      const events = extractResponseData(response);
+      setEvents(events);
       setCurrentPage(page);
       setHasSearched(true);
-      setTotalResults(response.events?.length || 0);
+      setTotalResults(events.length);
     } catch (error) {
-      console.error('Error searching events:', error);
-      alert('Error searching events');
+      const errorMessage = handleApiError(error, 'Error searching events');
+      alert(errorMessage);
       setEvents([]);
     } finally {
       setLoading(false);

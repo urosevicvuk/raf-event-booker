@@ -3,8 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import PublicLayout from '../../components/public/PublicLayout';
 import Pagination from '../../components/common/Pagination';
 import type {Event, Category} from '../../types';
-import EventService from '../../services/eventService';
-import CategoryService from '../../services/categoryService';
+import {EventService} from '../../services/eventService';
+import {CategoryService} from '../../services/categoryService';
 
 const CategoryPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

@@ -4,7 +4,8 @@ import Table from '../../components/common/Table';
 import Modal from '../../components/common/Modal';
 import CategoryForm from '../../components/ems/CategoryForm';
 import type {Category, CategoryFormData} from '../../types';
-import CategoryService from '../../services/categoryService';
+import {CategoryService} from '../../services/categoryService';
+import {extractResponseData, handleApiError} from '../../services/api';
 
 const CategoriesPage: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -27,22 +28,16 @@ const CategoriesPage: React.FC = () => {
       setLoading(true);
       const response = await CategoryService.getCategoriesPaginated(currentPage, pageLimit);
       
-      // Handle response structure
-      if (response.categories) {
-        setCategories(response.categories);
-      } else if (response.items) {
-        setCategories(response.items);
-      } else {
-        setCategories([]);
-      }
+      // Use utility function to extract data
+      setCategories(extractResponseData(response));
       
       // Calculate total pages from total count
       if (response.total) {
         setTotalPages(Math.ceil(response.total / pageLimit));
       }
     } catch (error) {
-      console.error('Error fetching categories:', error);
-      alert('Error loading categories');
+      const errorMessage = handleApiError(error, 'Error loading categories');
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -68,11 +63,11 @@ const CategoriesPage: React.FC = () => {
       await CategoryService.deleteCategory(category.id);
       await fetchCategories();
     } catch (error: any) {
-      console.error('Error deleting category:', error);
       if (error.response?.status === 400 || error.response?.data?.message?.includes('events')) {
         alert('Cannot delete category that has events associated with it');
       } else {
-        alert('Error deleting category');
+        const errorMessage = handleApiError(error, 'Error deleting category');
+        alert(errorMessage);
       }
     } finally {
       setDeleteLoading(null);
@@ -92,11 +87,11 @@ const CategoriesPage: React.FC = () => {
       setModalOpen(false);
       await fetchCategories();
     } catch (error: any) {
-      console.error('Error saving category:', error);
       if (error.response?.status === 409) {
         alert('A category with this name already exists');
       } else {
-        alert('Error saving category');
+        const errorMessage = handleApiError(error, 'Error saving category');
+        alert(errorMessage);
       }
     } finally {
       setFormLoading(false);

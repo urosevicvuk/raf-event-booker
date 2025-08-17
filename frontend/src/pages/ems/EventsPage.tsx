@@ -4,9 +4,10 @@ import EMSLayout from '../../components/ems/EMSLayout';
 import Table from '../../components/common/Table';
 import Modal from '../../components/common/Modal';
 import EventForm from '../../components/ems/EventForm';
-import type {Event, EventFormData, PaginatedResponse} from '../../types';
+import type {Event, EventFormData} from '../../types';
 import { useAuth } from '../../hooks/useAuth';
-import EventService from '../../services/eventService';
+import {EventService} from '../../services/eventService';
+import {extractResponseData, handleApiError} from '../../services/api';
 
 const EventsPage: React.FC = () => {
   const { user } = useAuth();
@@ -31,22 +32,16 @@ const EventsPage: React.FC = () => {
       setLoading(true);
       const response = await EventService.getEventsPaginated(currentPage, pageLimit);
       
-      // Handle both possible response structures
-      if (response.events) {
-        setEvents(response.events);
-      } else if (response.items) {
-        setEvents(response.items);
-      } else {
-        setEvents([]);
-      }
+      // Use utility function to extract data
+      setEvents(extractResponseData(response));
       
       // Calculate total pages from total count
       if (response.total) {
         setTotalPages(Math.ceil(response.total / pageLimit));
       }
     } catch (error) {
-      console.error('Error fetching events:', error);
-      alert('Error loading events');
+      const errorMessage = handleApiError(error, 'Error loading events');
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }

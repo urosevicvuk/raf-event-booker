@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type {Event, EventFormData, Category} from '../../types';
-import CategoryService from '../../services/categoryService';
-import './Form.css';
+import {CategoryService} from '../../services/categoryService';
+import '../common/FormStyles.css';
 
 interface EventFormProps {
   event?: Event;

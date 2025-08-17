@@ -1,4 +1,5 @@
 import axios, {type AxiosResponse, AxiosError } from 'axios';
+import type {PaginatedResponse} from '../types';
 
 const API_BASE_URL = 'http://localhost:8081/api';
 
@@ -39,5 +40,20 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Utility function to extract data from paginated responses
+export const extractResponseData = <T>(response: PaginatedResponse<T>): T[] => {
+  return response.items || response.events || response.users || 
+         response.categories || response.comments || [];
+};
+
+// Enhanced error handling utility
+export const handleApiError = (error: any, userMessage?: string): string => {
+  console.error('API Error:', error);
+  const message = userMessage || 
+                  error.response?.data?.message || 
+                  'An error occurred. Please try again.';
+  return message;
+};
 
 export default axiosInstance;

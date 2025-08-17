@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type {Event} from '../../types';
-import EventService from '../../services/eventService';
-import RSVPService from '../../services/rsvpService';
+import {EventService} from '../../services/eventService';
+import {RSVPService} from '../../services/rsvpService';
 import RSVPModal from './RSVPModal';
 import './EventInteractions.css';
 

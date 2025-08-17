@@ -3,8 +3,9 @@ import EMSLayout from '../../components/ems/EMSLayout';
 import Table from '../../components/common/Table';
 import Modal from '../../components/common/Modal';
 import UserForm from '../../components/ems/UserForm';
-import type {User, UserFormData, UserUpdateData, PaginatedResponse} from '../../types';
-import UserService from '../../services/userService';
+import type {User, UserFormData, UserUpdateData} from '../../types';
+import {UserService} from '../../services/userService';
+import {extractResponseData, handleApiError} from '../../services/api';
 import './UsersPage.css';
 
 const UsersPage: React.FC = () => {
@@ -15,8 +16,7 @@ const UsersPage: React.FC = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<{ userId: number; action: string } | null>(null);
   // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage] = useState(1);
   const [pageLimit] = useState(10);
 
   useEffect(() => {
@@ -28,22 +28,13 @@ const UsersPage: React.FC = () => {
       setLoading(true);
       const response = await UserService.getUsersPaginated(currentPage, pageLimit, undefined, false); // Get all users (active + inactive)
       
-      // Handle response structure
-      if (response.users) {
-        setUsers(response.users);
-      } else if (response.items) {
-        setUsers(response.items);
-      } else {
-        setUsers([]);
-      }
+      // Use utility function to extract data
+      setUsers(extractResponseData(response));
       
-      // Calculate total pages from total count
-      if (response.total) {
-        setTotalPages(Math.ceil(response.total / pageLimit));
-      }
+      // Note: Pagination is simplified - users page loads all users at once
     } catch (error) {
-      console.error('Error fetching users:', error);
-      alert('Error loading users');
+      const errorMessage = handleApiError(error, 'Error loading users');
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }

@@ -4,7 +4,7 @@ import PublicLayout from '../../components/public/PublicLayout';
 import EventInteractions from '../../components/public/EventInteractions';
 import EventComments from '../../components/public/EventComments';
 import type {Event} from '../../types';
-import EventService from '../../services/eventService';
+import {EventService} from '../../services/eventService';
 import './EventDetailPage.css';
 
 const EventDetailPage: React.FC = () => {

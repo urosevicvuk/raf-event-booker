@@ -38,4 +38,3 @@ export class RSVPService {
   }
 }
 
-export default RSVPService;

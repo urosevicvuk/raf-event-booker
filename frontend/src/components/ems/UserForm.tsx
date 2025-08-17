@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type {User, UserFormData, UserUpdateData} from '../../types';
-import './Form.css';
+import '../common/FormStyles.css';
 
 interface UserFormProps {
   user?: User;

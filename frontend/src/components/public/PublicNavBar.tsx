@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import type {Category} from '../../types';
-import CategoryService from '../../services/categoryService';
+import {CategoryService} from '../../services/categoryService';
 import './PublicNavBar.css';
 
 const PublicNavBar: React.FC = () => {

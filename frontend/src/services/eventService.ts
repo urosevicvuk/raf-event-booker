@@ -137,4 +137,4 @@ export class EventService {
   }
 }
 
-export default EventService;
+// Removed default export for consistency

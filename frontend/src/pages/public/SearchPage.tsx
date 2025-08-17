@@ -3,10 +3,10 @@ import { useSearchParams, Link } from 'react-router-dom';
 import PublicLayout from '../../components/public/PublicLayout';
 import Pagination from '../../components/common/Pagination';
 import type {Event} from '../../types';
-import EventService from '../../services/eventService';
+import {EventService} from '../../services/eventService';
 
 const SearchPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
   
   const [searchTerm, setSearchTerm] = useState(initialQuery);
@@ -43,9 +43,11 @@ const SearchPage: React.FC = () => {
       setEvents(newEvents);
       setHasSearched(true);
       
-      // Calculate total pages from total count
-      if (response.total) {
-        setTotalPages(Math.ceil(response.total / limit));
+      // Calculate total pages based on returned events count (simple approach)
+      if (newEvents.length === limit) {
+        setTotalPages(currentPage + 1); // There might be more pages
+      } else {
+        setTotalPages(currentPage); // This is likely the last page
       }
     } catch (error) {
       console.error('Error searching events:', error);
@@ -59,11 +61,11 @@ const SearchPage: React.FC = () => {
     e.preventDefault();
     setCurrentPage(1);
     performSearch(searchTerm);
-    // Update URL
+    // Update URL using React Router hooks
     if (searchTerm.trim()) {
-      window.history.replaceState(null, '', `/search?q=${encodeURIComponent(searchTerm.trim())}`);
+      setSearchParams({ q: searchTerm.trim() });
     } else {
-      window.history.replaceState(null, '', `/search`);
+      setSearchParams({});
     }
   };
 
@@ -71,7 +73,7 @@ const SearchPage: React.FC = () => {
     setSearchTerm('');
     setCurrentPage(1);
     performSearch('');
-    window.history.replaceState(null, '', `/search`);
+    setSearchParams({});
   };
 
   const handlePageChange = (page: number) => {

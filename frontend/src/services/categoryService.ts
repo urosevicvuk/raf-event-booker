@@ -34,4 +34,4 @@ export class CategoryService {
   }
 }
 
-export default CategoryService;
+// Removed default export for consistency

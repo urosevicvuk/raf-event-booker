@@ -32,4 +32,3 @@ export class CommentService {
   }
 }
 
-export default CommentService;

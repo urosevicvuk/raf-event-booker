@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type {Comment, CommentFormData} from '../../types';
-import CommentService from '../../services/commentService';
+import {CommentService} from '../../services/commentService';
 import './EventComments.css';
 
 interface EventCommentsProps {

@@ -69,7 +69,7 @@ export interface RSVP {
   registrationDate: string;
 }
 
-// API Response types
+// API Response types - simplified to use utility function for data extraction
 export interface PaginatedResponse<T> {
   items?: T[];
   events?: T[];

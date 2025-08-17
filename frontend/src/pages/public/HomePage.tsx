@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '../../components/public/PublicLayout';
 import type {Event, Category} from '../../types';
-import EventService from '../../services/eventService';
-import CategoryService from '../../services/categoryService';
+import {EventService} from '../../services/eventService';
+import {CategoryService} from '../../services/categoryService';
 import './HomePage.css';
 
 const HomePage: React.FC = () => {
