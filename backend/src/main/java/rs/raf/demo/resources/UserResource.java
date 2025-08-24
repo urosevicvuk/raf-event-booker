@@ -20,7 +20,6 @@ public class UserResource {
     @Inject
     private UserService userService;
 
-    // Authentication endpoints
     @POST
     @Path("/login")
     @Produces(MediaType.APPLICATION_JSON)
@@ -38,7 +37,6 @@ public class UserResource {
         return Response.ok(response).build();
     }
 
-    // User management endpoints (Admin only)
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response all(@QueryParam("type") String userType,
@@ -53,7 +51,6 @@ public class UserResource {
                 users = this.userService.allUsers();
             }
             
-            // Remove sensitive data
             users.forEach(user -> user.setHashedPassword(null));
             
             return Response.ok(users).build();
@@ -64,7 +61,6 @@ public class UserResource {
         }
     }
 
-    // Paginated users endpoint
     @GET
     @Path("/paginated")
     @Produces(MediaType.APPLICATION_JSON)
@@ -82,19 +78,17 @@ public class UserResource {
                 allUsers = this.userService.allUsers();
             }
             
-            // Calculate pagination
             int total = allUsers.size();
             int offset = (page - 1) * limit;
             int endIndex = Math.min(offset + limit, total);
             
             List<User> paginatedUsers;
             if (offset >= total) {
-                paginatedUsers = List.of(); // Empty list if page is beyond available data
+                paginatedUsers = List.of();
             } else {
                 paginatedUsers = allUsers.subList(offset, endIndex);
             }
             
-            // Remove sensitive data
             paginatedUsers.forEach(user -> user.setHashedPassword(null));
             
             Map<String, Object> response = new HashMap<>();
@@ -115,7 +109,6 @@ public class UserResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response create(@Valid User user) {
-        // Check if email already exists
         if (this.userService.existsByEmail(user.getEmail())) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Email already exists");
@@ -124,7 +117,6 @@ public class UserResource {
 
         try {
             User savedUser = this.userService.addUser(user);
-            // Remove sensitive data from response
             savedUser.setHashedPassword(null);
             return Response.status(Response.Status.CREATED).entity(savedUser).build();
         } catch (Exception e) {
@@ -145,7 +137,6 @@ public class UserResource {
             return Response.status(Response.Status.NOT_FOUND).entity(response).build();
         }
         
-        // Remove sensitive data
         user.setHashedPassword(null);
         return Response.ok(user).build();
     }
@@ -161,7 +152,6 @@ public class UserResource {
             return Response.status(Response.Status.NOT_FOUND).entity(response).build();
         }
         
-        // Remove sensitive data
         user.setHashedPassword(null);
         return Response.ok(user).build();
     }
@@ -177,7 +167,6 @@ public class UserResource {
             return Response.status(Response.Status.NOT_FOUND).entity(response).build();
         }
 
-        // Check if email is being changed and already exists for another user
         User existingUser = this.userService.findUser(id);
         if (!existingUser.getEmail().equals(updateRequest.getEmail()) && this.userService.existsByEmail(updateRequest.getEmail())) {
             Map<String, String> response = new HashMap<>();
@@ -186,18 +175,16 @@ public class UserResource {
         }
 
         try {
-            // Convert UserUpdateRequest to User entity
             User user = new User();
             user.setId(id);
             user.setEmail(updateRequest.getEmail());
             user.setFirstName(updateRequest.getFirstName());
             user.setLastName(updateRequest.getLastName());
             user.setUserType(updateRequest.getUserType());
-            user.setStatus(existingUser.getStatus()); // Keep existing status
-            user.setHashedPassword(existingUser.getHashedPassword()); // Keep existing password
+            user.setStatus(existingUser.getStatus());
+            user.setHashedPassword(existingUser.getHashedPassword());
             
             User updatedUser = this.userService.updateUser(user);
-            // Remove sensitive data
             updatedUser.setHashedPassword(null);
             return Response.ok(updatedUser).build();
         } catch (Exception e) {
@@ -218,7 +205,6 @@ public class UserResource {
         }
 
         User user = this.userService.findUser(id);
-        // Prevent deletion of admin users (safety check)
         if ("admin".equals(user.getUserType())) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Cannot delete admin users");
@@ -237,7 +223,6 @@ public class UserResource {
         }
     }
 
-    // Activate/Deactivate user endpoints
     @PUT
     @Path("/{id}/activate")
     @Produces(MediaType.APPLICATION_JSON)
@@ -276,7 +261,6 @@ public class UserResource {
             return Response.status(Response.Status.NOT_FOUND).entity(response).build();
         }
 
-        // Prevent deactivation of admin users
         if ("admin".equals(user.getUserType())) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Cannot deactivate admin users");
@@ -299,7 +283,6 @@ public class UserResource {
         }
     }
 
-    // Password change endpoint
     @PUT
     @Path("/{id}/password")
     @Produces(MediaType.APPLICATION_JSON)
@@ -327,7 +310,7 @@ public class UserResource {
         }
 
         try {
-            user.setHashedPassword(newPassword); // Will be hashed in the service
+            user.setHashedPassword(newPassword);
             this.userService.updateUser(user);
             
             Map<String, String> response = new HashMap<>();

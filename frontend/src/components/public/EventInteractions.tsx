@@ -27,18 +27,16 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
   const [interactionLoading, setInteractionLoading] = useState(false);
 
   useEffect(() => {
-    // Check like/dislike status from session storage
+    // Provera stanja reakcija iz session storage-a
     const likeKey = `liked_event_${event.id}`;
     const dislikeKey = `disliked_event_${event.id}`;
     setHasLiked(!!sessionStorage.getItem(likeKey));
     setHasDisliked(!!sessionStorage.getItem(dislikeKey));
 
-    // Fetch RSVP status
     if (event.maxCapacity) {
       fetchRSVPStatus();
     }
 
-    // Increment view count (only once per session)
     const viewKey = `viewed_event_${event.id}`;
     if (!sessionStorage.getItem(viewKey)) {
       incrementViewCount();
@@ -61,7 +59,6 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
   const incrementViewCount = async () => {
     try {
       await EventService.incrementView(event.id);
-      // Update local event object
       onEventUpdate({ ...event, views: event.views + 1 });
     } catch (error) {
       console.error('Error incrementing view count:', error);
@@ -78,11 +75,9 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
       const likeKey = `liked_event_${event.id}`;
       const dislikeKey = `disliked_event_${event.id}`;
       
-      // Sync frontend state with backend session state
       setHasLiked(response.hasLiked);
       setHasDisliked(response.hasDisliked);
       
-      // Update sessionStorage to match backend session
       if (response.hasLiked) {
         sessionStorage.setItem(likeKey, 'true');
       } else {
@@ -95,7 +90,6 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
         sessionStorage.removeItem(dislikeKey);
       }
       
-      // Use counts from backend response
       onEventUpdate({ 
         ...event, 
         likeCount: response.likeCount,
@@ -119,11 +113,9 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
       const likeKey = `liked_event_${event.id}`;
       const dislikeKey = `disliked_event_${event.id}`;
       
-      // Sync frontend state with backend session state
       setHasLiked(response.hasLiked);
       setHasDisliked(response.hasDisliked);
       
-      // Update sessionStorage to match backend session
       if (response.hasLiked) {
         sessionStorage.setItem(likeKey, 'true');
       } else {
@@ -136,7 +128,6 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
         sessionStorage.removeItem(dislikeKey);
       }
       
-      // Use counts from backend response
       onEventUpdate({ 
         ...event, 
         likeCount: response.likeCount,
@@ -159,8 +150,7 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
     setRsvpLoading(true);
     try {
       await RSVPService.registerForEvent(event.id, email);
-      await fetchRSVPStatus(); // Refresh status
-      // Success message will be handled by the modal closing
+      await fetchRSVPStatus();
     } finally {
       setRsvpLoading(false);
     }
@@ -172,7 +162,6 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
         <h3>Event Interactions</h3>
         
         <div className="interactions-grid">
-          {/* Views and Stats */}
           <div className="stats-container">
             <div className="stat">
               <span className="stat-label">Views</span>
@@ -186,7 +175,6 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
             </div>
           </div>
 
-          {/* Reaction Buttons */}
           <div className="reactions-container">
             <div className="reaction-buttons">
               <button
@@ -208,7 +196,6 @@ const EventInteractions: React.FC<EventInteractionsProps> = ({
             </div>
           </div>
 
-          {/* RSVP Section */}
           {event.maxCapacity && (
             <div className="rsvp-container">
               <div className="rsvp-info">

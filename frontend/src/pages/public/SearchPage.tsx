@@ -22,7 +22,6 @@ const SearchPage: React.FC = () => {
     if (initialQuery) {
       performSearch(initialQuery);
     } else {
-      // Load all events on initial page load when no query
       performSearch("");
     }
   }, [initialQuery]);
@@ -43,11 +42,10 @@ const SearchPage: React.FC = () => {
       setEvents(newEvents);
       setHasSearched(true);
       
-      // Calculate total pages based on returned events count (simple approach)
       if (newEvents.length === limit) {
-        setTotalPages(currentPage + 1); // There might be more pages
+        setTotalPages(currentPage + 1);
       } else {
-        setTotalPages(currentPage); // This is likely the last page
+        setTotalPages(currentPage);
       }
     } catch (error) {
       console.error('Error searching events:', error);
@@ -61,7 +59,6 @@ const SearchPage: React.FC = () => {
     e.preventDefault();
     setCurrentPage(1);
     performSearch(searchTerm);
-    // Update URL using React Router hooks
     if (searchTerm.trim()) {
       setSearchParams({ q: searchTerm.trim() });
     } else {

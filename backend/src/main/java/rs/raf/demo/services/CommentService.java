@@ -17,12 +17,10 @@ public class CommentService {
     private CommentRepository commentRepository;
 
     public Comment addComment(Comment comment) {
-        // Set creation time if not set
         if (comment.getCreatedAt() == null) {
             comment.setCreatedAt(LocalDateTime.now());
         }
         
-        // Initialize counters if null
         if (comment.getLikeCount() == null) {
             comment.setLikeCount(0);
         }
@@ -53,7 +51,6 @@ public class CommentService {
         return this.commentRepository.existsById(id);
     }
 
-    // Event-related comment methods
     public List<Comment> findCommentsByEventId(Integer eventId) {
         return this.commentRepository.findCommentsByEventId(eventId);
     }
@@ -62,7 +59,6 @@ public class CommentService {
         return this.commentRepository.findCommentsByEventIdPaginated(eventId, offset, limit);
     }
 
-    // Reaction methods with increment/decrement
     public void incrementLikes(Integer commentId) {
         this.commentRepository.incrementLikes(commentId);
     }

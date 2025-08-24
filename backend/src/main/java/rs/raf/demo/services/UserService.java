@@ -27,12 +27,10 @@ public class UserService {
         }
 
         Date issuedAt = new Date();
-        Date expiresAt = new Date(issuedAt.getTime() + 24*60*60*1000); // One day
+        Date expiresAt = new Date(issuedAt.getTime() + 24*60*60*1000);
 
         Algorithm algorithm = Algorithm.HMAC256("secret");
 
-        // JWT-om mozete bezbedono poslati informacije na FE
-        // Tako sto sve sto zelite da posaljete zapakujete u claims mapu
         return JWT.create()
                 .withIssuedAt(issuedAt)
                 .withExpiresAt(expiresAt)
@@ -48,7 +46,6 @@ public class UserService {
         DecodedJWT jwt = verifier.verify(token);
 
         String username = jwt.getSubject();
-//        jwt.getClaim("role").asString();
 
         User user = this.userRepository.findUserByEmail(username);
 
@@ -60,7 +57,6 @@ public class UserService {
     }
 
     public User addUser(User user) {
-        // Hash the password before saving
         if (user.getHashedPassword() != null) {
             user.setHashedPassword(DigestUtils.sha256Hex(user.getHashedPassword()));
         }
@@ -92,9 +88,7 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-        // If password is being updated, hash it
         if (user.getHashedPassword() != null && !user.getHashedPassword().isEmpty()) {
-            // Check if it's already hashed (SHA-256 hashes are 64 chars long)
             if (user.getHashedPassword().length() != 64) {
                 user.setHashedPassword(DigestUtils.sha256Hex(user.getHashedPassword()));
             }
@@ -115,14 +109,12 @@ public class UserService {
     }
 
     public List<User> findActiveUsers() {
-        // Simple implementation using basic methods
         return this.userRepository.allUsers().stream()
                 .filter(user -> "active".equals(user.getStatus()))
                 .collect(java.util.stream.Collectors.toList());
     }
 
     public List<User> findUsersByType(String userType) {
-        // Simple implementation using basic methods
         return this.userRepository.allUsers().stream()
                 .filter(user -> userType.equals(user.getUserType()))
                 .collect(java.util.stream.Collectors.toList());
@@ -143,7 +135,7 @@ public class UserService {
             user.setStatus("inactive");
             return this.userRepository.updateUser(user);
         }
-        return null; // Cannot deactivate admin users
+        return null;
     }
 
     public boolean canDeleteUser(Integer id) {

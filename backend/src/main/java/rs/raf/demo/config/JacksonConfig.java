@@ -15,13 +15,8 @@ public class JacksonConfig implements ContextResolver<ObjectMapper> {
     public JacksonConfig() {
         mapper = new ObjectMapper();
         
-        // Register the JavaTimeModule to handle Java 8 time types
         mapper.registerModule(new JavaTimeModule());
-        
-        // Disable writing dates as timestamps (write as strings instead)
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        
-        // Configure other useful settings
         mapper.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
     }
 

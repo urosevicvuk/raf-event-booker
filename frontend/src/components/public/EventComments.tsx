@@ -18,7 +18,6 @@ const EventComments: React.FC<EventCommentsProps> = ({ eventId }) => {
     authorName: '',
     text: ''
   });
-  // Track like/dislike status for each comment
   const [commentLikeStatus, setCommentLikeStatus] = useState<Record<number, { hasLiked: boolean; hasDisliked: boolean }>>({});
 
   const limit = 10;
@@ -64,7 +63,6 @@ const EventComments: React.FC<EventCommentsProps> = ({ eventId }) => {
       setSubmitting(true);
       await CommentService.createComment(eventId, formData);
       setFormData({ authorName: '', text: '' });
-      // Refresh comments
       await fetchComments(1, true);
       setPage(1);
     } catch (error) {
@@ -82,7 +80,6 @@ const EventComments: React.FC<EventCommentsProps> = ({ eventId }) => {
       setInteractionLoading(commentId);
       const response = await CommentService.likeComment(commentId);
       
-      // Update like/dislike status from backend
       setCommentLikeStatus(prev => ({
         ...prev,
         [commentId]: {
@@ -91,7 +88,6 @@ const EventComments: React.FC<EventCommentsProps> = ({ eventId }) => {
         }
       }));
       
-      // Update local state with response from backend
       setComments(prev => prev.map(comment => {
         if (comment.id === commentId) {
           return { 
@@ -116,7 +112,6 @@ const EventComments: React.FC<EventCommentsProps> = ({ eventId }) => {
       setInteractionLoading(commentId);
       const response = await CommentService.dislikeComment(commentId);
       
-      // Update like/dislike status from backend
       setCommentLikeStatus(prev => ({
         ...prev,
         [commentId]: {
@@ -125,7 +120,6 @@ const EventComments: React.FC<EventCommentsProps> = ({ eventId }) => {
         }
       }));
       
-      // Update local state with response from backend
       setComments(prev => prev.map(comment => {
         if (comment.id === commentId) {
           return { 

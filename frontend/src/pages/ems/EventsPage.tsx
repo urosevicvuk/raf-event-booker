@@ -18,7 +18,6 @@ const EventsPage: React.FC = () => {
   const [editingEvent, setEditingEvent] = useState<Event | undefined>();
   const [formLoading, setFormLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageLimit] = useState(10);
@@ -32,10 +31,7 @@ const EventsPage: React.FC = () => {
       setLoading(true);
       const response = await EventService.getEventsPaginated(currentPage, pageLimit);
       
-      // Use utility function to extract data
       setEvents(extractResponseData(response));
-      
-      // Calculate total pages from total count
       if (response.total) {
         setTotalPages(Math.ceil(response.total / pageLimit));
       }
@@ -65,7 +61,6 @@ const EventsPage: React.FC = () => {
     try {
       setDeleteLoading(event.id);
       await EventService.deleteEvent(event.id);
-      // Stay on current page after deletion
       await fetchEvents();
     } catch (error: any) {
       console.error('Error deleting event:', error);
@@ -80,24 +75,21 @@ const EventsPage: React.FC = () => {
       setFormLoading(true);
       
       if (editingEvent) {
-        // For updates, don't include authorId (author shouldn't change)
         const updateData = {
           ...formData,
           eventDate: new Date(formData.eventDate).toISOString()
         };
         await EventService.updateEvent(editingEvent.id, updateData);
       } else {
-        // For creates, include authorId
         const createData = {
           ...formData,
           eventDate: new Date(formData.eventDate).toISOString(),
-          authorId: user!.id // Current user is the author
+          authorId: user!.id
         };
         await EventService.createEvent(createData);
       }
       
       setModalOpen(false);
-      // Reset to page 1 when creating/updating to see the change
       if (currentPage !== 1) {
         setCurrentPage(1);
       } else {
@@ -129,7 +121,6 @@ const EventsPage: React.FC = () => {
   };
 
   const handleViewEvent = (event: Event) => {
-    // Navigate to event in same tab
     navigate(`/event/${event.id}`);
   };
 

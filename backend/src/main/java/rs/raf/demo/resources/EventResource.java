@@ -30,12 +30,10 @@ public class EventResource {
     @Context
     private HttpServletRequest request;
 
-    // Basic CRUD for EMS
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response all() {
         List<Event> events = this.eventService.allEvents();
-        // Populate events with tags for EMS
         events = this.eventService.populateEventsWithTags(events);
         return Response.ok(events).build();
     }
@@ -79,7 +77,6 @@ public class EventResource {
             response.put("message", "Event not found");
             return Response.status(Response.Status.NOT_FOUND).entity(response).build();
         }
-        // Populate with complete data including category and author
         event = this.eventService.populateEventWithCompleteData(event);
         return Response.ok(event).build();
     }
@@ -96,17 +93,14 @@ public class EventResource {
         }
         
         try {
-            // Convert EventUpdateRequest to Event entity
             Event event = new Event();
             event.setId(id);
             event.setTitle(updateRequest.getTitle());
             event.setDescription(updateRequest.getDescription());
-            // Parse ISO date string properly (handles "2024-01-01T12:00:00.000Z" format)
             LocalDateTime eventDate;
             try {
                 eventDate = OffsetDateTime.parse(updateRequest.getEventDate()).toLocalDateTime();
             } catch (Exception e) {
-                // Fallback to direct parsing if it's already in LocalDateTime format
                 eventDate = LocalDateTime.parse(updateRequest.getEventDate());
             }
             event.setEventDate(eventDate);
@@ -119,7 +113,6 @@ public class EventResource {
                 updatedEvent = this.eventService.updateEventWithTags(event, updateRequest.getTags());
             } else {
                 updatedEvent = this.eventService.updateEvent(event);
-                // Still need to populate tags for response
                 updatedEvent = this.eventService.getEventWithTags(updatedEvent.getId());
             }
             return Response.ok(updatedEvent).build();
@@ -145,7 +138,6 @@ public class EventResource {
         return Response.ok(response).build();
     }
 
-    // Paginated events (for EMS and public)
     @GET
     @Path("/paginated")
     @Produces(MediaType.APPLICATION_JSON)
@@ -153,17 +145,16 @@ public class EventResource {
                                    @QueryParam("limit") @DefaultValue("10") int limit) {
         int offset = (page - 1) * limit;
         List<Event> events = this.eventService.allEventsPaginated(offset, limit);
-        List<Event> allEvents = this.eventService.allEvents(); // Get total count
+        List<Event> allEvents = this.eventService.allEvents();
         
         Map<String, Object> response = new HashMap<>();
         response.put("events", events);
         response.put("page", page);
         response.put("limit", limit);
-        response.put("total", allEvents.size()); // Add total count
+        response.put("total", allEvents.size());
         return Response.ok(response).build();
     }
 
-    // Search endpoints
     @GET
     @Path("/search")
     @Produces(MediaType.APPLICATION_JSON)
@@ -175,8 +166,7 @@ public class EventResource {
         String actualSearchTerm = "";
         
         if (searchTerm == null || searchTerm.trim().isEmpty()) {
-            // Return all events when no search term provided
-            allResults = this.eventService.allEvents(); // Get total count
+            allResults = this.eventService.allEvents();
             
             if (page > 0 && limit > 0) {
                 int offset = (page - 1) * limit;
@@ -185,9 +175,8 @@ public class EventResource {
                 events = allResults;
             }
         } else {
-            // Search with the provided term
             actualSearchTerm = searchTerm.trim();
-            allResults = this.eventService.searchEventsByTitleOrDescription(actualSearchTerm); // Get total count
+            allResults = this.eventService.searchEventsByTitleOrDescription(actualSearchTerm);
             
             if (page > 0 && limit > 0) {
                 int offset = (page - 1) * limit;
@@ -197,7 +186,6 @@ public class EventResource {
             }
         }
 
-        // Populate complete data for search results
         events = this.eventService.populateEventsWithCompleteData(events);
         
         Map<String, Object> response = new HashMap<>();
@@ -205,18 +193,17 @@ public class EventResource {
         response.put("searchTerm", actualSearchTerm);
         response.put("page", page);
         response.put("limit", limit);
-        response.put("total", allResults.size()); // Add total count
+        response.put("total", allResults.size());
         return Response.ok(response).build();
     }
 
-    // Filter by category
     @GET
     @Path("/category/{categoryId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEventsByCategory(@PathParam("categoryId") Integer categoryId,
                                        @QueryParam("page") @DefaultValue("1") int page,
                                        @QueryParam("limit") @DefaultValue("10") int limit) {
-        List<Event> allCategoryEvents = this.eventService.findEventsByCategory(categoryId); // Get total count
+        List<Event> allCategoryEvents = this.eventService.findEventsByCategory(categoryId);
         List<Event> events;
         
         if (page > 0 && limit > 0) {
@@ -226,7 +213,6 @@ public class EventResource {
             events = allCategoryEvents;
         }
 
-        // Populate complete data for category events
         events = this.eventService.populateEventsWithCompleteData(events);
         
         Map<String, Object> response = new HashMap<>();
@@ -234,18 +220,17 @@ public class EventResource {
         response.put("categoryId", categoryId);
         response.put("page", page);
         response.put("limit", limit);
-        response.put("total", allCategoryEvents.size()); // Add total count
+        response.put("total", allCategoryEvents.size());
         return Response.ok(response).build();
     }
 
-    // Filter by tag
     @GET
     @Path("/tag/{tagId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEventsByTag(@PathParam("tagId") Integer tagId,
                                   @QueryParam("page") @DefaultValue("1") int page,
                                   @QueryParam("limit") @DefaultValue("10") int limit) {
-        List<Event> allTagEvents = this.eventService.findEventsByTag(tagId); // Get total count
+        List<Event> allTagEvents = this.eventService.findEventsByTag(tagId);
         List<Event> events;
         
         if (page > 0 && limit > 0) {
@@ -255,7 +240,6 @@ public class EventResource {
             events = allTagEvents;
         }
 
-        // Populate complete data for tag events
         events = this.eventService.populateEventsWithCompleteData(events);
         
         Map<String, Object> response = new HashMap<>();
@@ -263,11 +247,10 @@ public class EventResource {
         response.put("tagId", tagId);
         response.put("page", page);
         response.put("limit", limit);
-        response.put("total", allTagEvents.size()); // Add total count
+        response.put("total", allTagEvents.size());
         return Response.ok(response).build();
     }
 
-    // Filter by author (for EMS - my events)
     @GET
     @Path("/author/{authorId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -276,7 +259,6 @@ public class EventResource {
         return Response.ok(events).build();
     }
 
-    // Public platform endpoints
     @GET
     @Path("/latest")
     @Produces(MediaType.APPLICATION_JSON)
@@ -329,7 +311,6 @@ public class EventResource {
         return Response.ok(events).build();
     }
 
-    // View tracking endpoint
     @POST
     @Path("/{id}/view")
     @Produces(MediaType.APPLICATION_JSON)
@@ -357,7 +338,6 @@ public class EventResource {
         }
     }
 
-    // Like/dislike endpoints for events
     @POST
     @Path("/{id}/like")
     @Produces(MediaType.APPLICATION_JSON)
@@ -378,7 +358,6 @@ public class EventResource {
         Map<String, Object> response = new HashMap<>();
         
         if (Boolean.TRUE.equals(hasLiked)) {
-            // Unlike - remove like
             this.eventService.decrementLikes(eventId);
             session.removeAttribute(likedKey);
             response.put("message", "Like removed");
@@ -386,9 +365,7 @@ public class EventResource {
             response.put("hasLiked", false);
             response.put("hasDisliked", Boolean.TRUE.equals(hasDisliked));
         } else {
-            // Add like
             if (Boolean.TRUE.equals(hasDisliked)) {
-                // Remove dislike first
                 this.eventService.decrementDislikes(eventId);
                 session.removeAttribute(dislikedKey);
             }
@@ -397,10 +374,9 @@ public class EventResource {
             response.put("message", "Event liked");
             response.put("action", "liked");
             response.put("hasLiked", true);
-            response.put("hasDisliked", false); // Always false after liking
+            response.put("hasDisliked", false);
         }
         
-        // Add current event stats for frontend to update
         Event currentEvent = this.eventService.findEvent(eventId);
         response.put("likeCount", currentEvent.getLikeCount());
         response.put("dislikeCount", currentEvent.getDislikeCount());
@@ -428,7 +404,6 @@ public class EventResource {
         Map<String, Object> response = new HashMap<>();
         
         if (Boolean.TRUE.equals(hasDisliked)) {
-            // Remove dislike
             this.eventService.decrementDislikes(eventId);
             session.removeAttribute(dislikedKey);
             response.put("message", "Dislike removed");
@@ -436,9 +411,7 @@ public class EventResource {
             response.put("hasDisliked", false);
             response.put("hasLiked", Boolean.TRUE.equals(hasLiked));
         } else {
-            // Add dislike
             if (Boolean.TRUE.equals(hasLiked)) {
-                // Remove like first
                 this.eventService.decrementLikes(eventId);
                 session.removeAttribute(likedKey);
             }
@@ -447,10 +420,9 @@ public class EventResource {
             response.put("message", "Event disliked");
             response.put("action", "disliked");
             response.put("hasDisliked", true);
-            response.put("hasLiked", false); // Always false after disliking
+            response.put("hasLiked", false);
         }
         
-        // Add current event stats for frontend to update
         Event currentEvent = this.eventService.findEvent(eventId);
         response.put("likeCount", currentEvent.getLikeCount());
         response.put("dislikeCount", currentEvent.getDislikeCount());
@@ -458,7 +430,6 @@ public class EventResource {
         return Response.ok(response).build();
     }
 
-    // Get current RSVP count for an event
     @GET
     @Path("/{id}/rsvp-count")
     @Produces(MediaType.APPLICATION_JSON)

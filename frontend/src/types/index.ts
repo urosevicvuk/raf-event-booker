@@ -1,4 +1,3 @@
-// User types
 export interface User {
   id: number;
   email: string;
@@ -17,20 +16,17 @@ export interface LoginResponse {
   jwt: string;
 }
 
-// Category types
 export interface Category {
   id: number;
   name: string;
   description: string;
 }
 
-// Tag types
 export interface Tag {
   id: number;
   name: string;
 }
 
-// Event types
 export interface Event {
   id: number;
   title: string;
@@ -50,7 +46,6 @@ export interface Event {
   comments?: Comment[];
 }
 
-// Comment types
 export interface Comment {
   id: number;
   authorName: string;
@@ -61,7 +56,6 @@ export interface Comment {
   dislikeCount: number;
 }
 
-// RSVP types
 export interface RSVP {
   id: number;
   userIdentifier: string;
@@ -69,7 +63,6 @@ export interface RSVP {
   registrationDate: string;
 }
 
-// API Response types - simplified to use utility function for data extraction
 export interface PaginatedResponse<T> {
   items?: T[];
   events?: T[];
@@ -93,7 +86,6 @@ export interface ApiError {
   message: string;
 }
 
-// Form types
 export interface EventFormData {
   title: string;
   description: string;
@@ -130,7 +122,6 @@ export interface CommentFormData {
   text: string;
 }
 
-// Auth context types
 export interface AuthContextType {
   user: User | null;
   token: string | null;
@@ -142,7 +133,6 @@ export interface AuthContextType {
   loading: boolean;
 }
 
-// Interaction types
 export interface InteractionResponse {
   message: string;
   action: 'liked' | 'unliked' | 'disliked' | 'undisliked';

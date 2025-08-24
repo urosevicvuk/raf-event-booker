@@ -29,12 +29,10 @@ public class EventService {
     private UserService userService;
 
     public Event addEvent(Event event) {
-        // Set creation time if not set
         if (event.getCreatedAt() == null) {
             event.setCreatedAt(LocalDateTime.now());
         }
         
-        // Initialize counters if null
         if (event.getViews() == null) {
             event.setViews(0);
         }
@@ -68,12 +66,10 @@ public class EventService {
         return this.eventRepository.existsById(id);
     }
 
-    // Paginated methods
     public List<Event> allEventsPaginated(int offset, int limit) {
         return this.eventRepository.allEventsPaginated(offset, limit);
     }
 
-    // Search and filter methods
     public List<Event> searchEventsByTitleOrDescription(String searchTerm) {
         return this.eventRepository.searchEventsByTitleOrDescription(searchTerm);
     }
@@ -102,7 +98,6 @@ public class EventService {
         return this.eventRepository.findEventsByAuthor(authorId);
     }
 
-    // Home page and special queries
     public List<Event> findLatestEvents(int limit) {
         return this.eventRepository.findLatestEvents(limit);
     }
@@ -123,7 +118,6 @@ public class EventService {
         return this.eventRepository.findSimilarEvents(eventId, limit);
     }
 
-    // View and reaction methods
     public void incrementViews(Integer eventId) {
         this.eventRepository.incrementViews(eventId);
     }
@@ -144,34 +138,26 @@ public class EventService {
         this.eventRepository.decrementDislikes(eventId);
     }
 
-    // RSVP related
     public int getCurrentRSVPCount(Integer eventId) {
         return this.eventRepository.getCurrentRSVPCount(eventId);
     }
 
-    // Tag handling methods
     public Event addEventWithTags(Event event, String tagsString) {
-        // First save the event
         Event savedEvent = this.addEvent(event);
         
-        // Then handle tags
         if (tagsString != null && !tagsString.trim().isEmpty()) {
             List<Tag> tags = this.tagService.findOrCreateTags(tagsString);
             this.tagService.assignTagsToEvent(savedEvent.getId(), tags);
         }
         
-        // Return the event with tags populated
         return this.getEventWithTags(savedEvent.getId());
     }
 
     public Event updateEventWithTags(Event event, String tagsString) {
-        // Update the event
         Event updatedEvent = this.updateEvent(event);
         
-        // Handle tags
         if (tagsString != null) {
             if (tagsString.trim().isEmpty()) {
-                // Remove all tags if empty string provided
                 this.tagService.assignTagsToEvent(event.getId(), new java.util.ArrayList<>());
             } else {
                 List<Tag> tags = this.tagService.findOrCreateTags(tagsString);
@@ -179,7 +165,6 @@ public class EventService {
             }
         }
         
-        // Return the event with tags populated
         return this.getEventWithTags(event.getId());
     }
 
@@ -207,19 +192,16 @@ public class EventService {
     public Event populateEventWithCompleteData(Event event) {
         if (event == null) return null;
         
-        // Populate category
         if (event.getCategoryId() != null) {
             Category category = this.categoryService.findCategory(event.getCategoryId());
             event.setCategory(category);
         }
         
-        // Populate author
         if (event.getAuthorId() != null) {
             User author = this.userService.findUser(event.getAuthorId());
             event.setAuthor(author);
         }
         
-        // Populate tags
         List<Tag> tags = this.tagService.getTagsForEvent(event.getId());
         event.setTags(tags);
         

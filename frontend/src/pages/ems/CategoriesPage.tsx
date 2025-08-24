@@ -14,7 +14,6 @@ const CategoriesPage: React.FC = () => {
   const [editingCategory, setEditingCategory] = useState<Category | undefined>();
   const [formLoading, setFormLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageLimit] = useState(10);
@@ -28,10 +27,8 @@ const CategoriesPage: React.FC = () => {
       setLoading(true);
       const response = await CategoryService.getCategoriesPaginated(currentPage, pageLimit);
       
-      // Use utility function to extract data
       setCategories(extractResponseData(response));
       
-      // Calculate total pages from total count
       if (response.total) {
         setTotalPages(Math.ceil(response.total / pageLimit));
       }

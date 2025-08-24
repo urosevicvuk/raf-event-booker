@@ -22,7 +22,6 @@ public class RSVPService {
     private EventRepository eventRepository;
 
     public RSVP addRSVP(RSVP rsvp) {
-        // Set registration date if not set
         if (rsvp.getRegistrationDate() == null) {
             rsvp.setRegistrationDate(LocalDateTime.now());
         }
@@ -34,7 +33,6 @@ public class RSVPService {
         return this.rsvpRepository.existsById(id);
     }
 
-    // Enhanced RSVP methods
     public int getRSVPCount(Integer eventId) {
         return this.rsvpRepository.countRSVPsByEventId(eventId);
     }

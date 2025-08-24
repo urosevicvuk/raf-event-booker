@@ -15,7 +15,7 @@ const Pagination: React.FC<PaginationProps> = ({
   loading = false
 }) => {
   if (totalPages <= 1) {
-    return null; // Don't show pagination if there's only one page
+    return null;
   }
 
   const generatePageNumbers = () => {
@@ -23,12 +23,10 @@ const Pagination: React.FC<PaginationProps> = ({
     const maxVisiblePages = 5;
     
     if (totalPages <= maxVisiblePages) {
-      // Show all pages if total is small
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Show ellipsis logic for larger page counts
       const startPage = Math.max(1, currentPage - 2);
       const endPage = Math.min(totalPages, currentPage + 2);
       

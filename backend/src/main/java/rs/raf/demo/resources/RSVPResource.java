@@ -22,12 +22,10 @@ public class RSVPResource {
     @Inject
     private EventService eventService;
 
-    // Register for event with capacity checking (for public platform)
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response create(@Valid RSVP rsvp) {
-        // Check if event exists
         Event event = this.eventService.findEvent(rsvp.getEventId());
         if (event == null) {
             Map<String, String> response = new HashMap<>();
@@ -35,14 +33,12 @@ public class RSVPResource {
             return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
         }
 
-        // Check if user is already registered
         if (this.rsvpService.isUserRegistered(rsvp.getUserIdentifier(), rsvp.getEventId())) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "User is already registered for this event");
             return Response.status(Response.Status.CONFLICT).entity(response).build();
         }
 
-        // Check capacity if max capacity is set
         if (event.getMaxCapacity() != null && event.getMaxCapacity() > 0) {
             int currentCount = this.rsvpService.getRSVPCount(rsvp.getEventId());
             if (currentCount >= event.getMaxCapacity()) {
@@ -52,7 +48,6 @@ public class RSVPResource {
             }
         }
 
-        // Add RSVP
         try {
             RSVP savedRSVP = this.rsvpService.addRSVP(rsvp);
             Map<String, Object> response = new HashMap<>();
@@ -66,7 +61,6 @@ public class RSVPResource {
         }
     }
 
-    // Get RSVP status and count for event (to display "X/max registered" and check capacity)
     @GET
     @Path("/event/{eventId}/status")
     @Produces(MediaType.APPLICATION_JSON)
@@ -90,7 +84,6 @@ public class RSVPResource {
         return Response.ok(response).build();
     }
 
-    // Alternative endpoint path that frontend expects
     @GET
     @Path("/status/{eventId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -98,7 +91,6 @@ public class RSVPResource {
         return getEventRSVPStatus(eventId);
     }
 
-    // Check if a user is registered for an event
     @GET
     @Path("/event/{eventId}/user/{userIdentifier}/status")
     @Produces(MediaType.APPLICATION_JSON)
@@ -119,7 +111,6 @@ public class RSVPResource {
         return Response.ok(response).build();
     }
 
-    // Get all RSVPs for an event (for event management)
     @GET
     @Path("/event/{eventId}")
     @Produces(MediaType.APPLICATION_JSON)

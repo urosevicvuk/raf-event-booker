@@ -73,4 +73,3 @@ export class UserService {
   }
 }
 
-// Removed default export for consistency

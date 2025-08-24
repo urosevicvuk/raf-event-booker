@@ -36,14 +36,12 @@ public class AuthFilter implements ContainerRequestFilter {
                 token = token.replace("Bearer ", "");
             }
 
-            // Validate token and extract user
             User currentUser = this.validateTokenAndGetUser(token);
             if (currentUser == null) {
                 requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
                 return;
             }
 
-            // Check if user is active
             if (!"active".equals(currentUser.getStatus())) {
                 Map<String, String> response = new HashMap<>();
                 response.put("message", "User account is inactive");
@@ -51,10 +49,8 @@ public class AuthFilter implements ContainerRequestFilter {
                 return;
             }
 
-            // Store user in request context for use in resources
             requestContext.setProperty("currentUser", currentUser);
 
-            // Check role-based access for admin-only endpoints
             if (this.requiresAdminAccess(requestContext)) {
                 if (!"admin".equals(currentUser.getUserType())) {
                     Map<String, String> response = new HashMap<>();
@@ -87,7 +83,6 @@ public class AuthFilter implements ContainerRequestFilter {
         String path = req.getUriInfo().getPath();
         String method = req.getMethod();
 
-        // Never protect login endpoint
         if (path.contains("login")) {
             return false;
         }
@@ -95,17 +90,14 @@ public class AuthFilter implements ContainerRequestFilter {
         List<Object> matchedResources = req.getUriInfo().getMatchedResources();
         for (Object matchedResource : matchedResources) {
             
-            // Protect ALL UserResource endpoints except login (already handled above)
             if (matchedResource instanceof UserResource) {
                 return true;
             }
             
-            // Protect Category CREATE, UPDATE, DELETE operations
             if (matchedResource instanceof CategoryResource) {
                 return method.equals("POST") || method.equals("PUT") || method.equals("DELETE");
             }
             
-            // Protect Event CREATE, UPDATE, DELETE operations
             if (matchedResource instanceof EventResource) {
                 return method.equals("POST") || method.equals("PUT") || method.equals("DELETE");
             }
@@ -118,7 +110,6 @@ public class AuthFilter implements ContainerRequestFilter {
     private boolean requiresAdminAccess(ContainerRequestContext req) {
         List<Object> matchedResources = req.getUriInfo().getMatchedResources();
         for (Object matchedResource : matchedResources) {
-            // All UserResource operations require admin access (except login, already handled)
             if (matchedResource instanceof UserResource) {
                 return true;
             }

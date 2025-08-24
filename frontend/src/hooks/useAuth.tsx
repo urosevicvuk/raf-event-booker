@@ -14,7 +14,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing token and user on mount
+    // Provera postojanja tokena i korisničkih podataka
     const storedToken = AuthService.getToken();
     const storedUser = AuthService.getUser();
     
@@ -31,30 +31,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await AuthService.login({ email, password });
       const jwt = response.jwt;
       
-      // Decode JWT to get user information
+      // Dekodiranje JWT tokena
       const payload = JSON.parse(atob(jwt.split('.')[1]));
       
-      // We need to get full user info from the API since JWT only has email and role
-      // For now, create a minimal user object and fetch full details separately
+      // Kreiranje osnovnih korisničkih podataka
       const userInfo: User = {
         id: 0, // Will be set when we get user details
         email: payload.sub,
         firstName: '',
         lastName: '',
         userType: payload.role,
-        status: 'active' // Assume active since they can login
+        status: 'active'
       };
 
       AuthService.saveToken(jwt);
       
-      // Try to get full user details
+      // Učitavanje kompletnih korisničkih podataka
       try {
         const fullUser = await AuthService.getUserByEmail(payload.sub);
         const completeUser = { ...userInfo, ...fullUser };
         AuthService.saveUser(completeUser);
         setUser(completeUser);
       } catch {
-        // If we can't get user details, use the minimal info
         AuthService.saveUser(userInfo);
         setUser(userInfo);
       }

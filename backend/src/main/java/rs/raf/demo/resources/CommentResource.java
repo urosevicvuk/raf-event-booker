@@ -28,7 +28,6 @@ public class CommentResource {
     @Context
     private HttpServletRequest request;
 
-    // Create comment (for public platform)
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -39,12 +38,11 @@ public class CommentResource {
             return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
         }
         
-        // Convert CommentCreateRequest to Comment entity
         Comment comment = new Comment();
         comment.setAuthorName(createRequest.getAuthorName());
         comment.setText(createRequest.getText());
         comment.setEventId(createRequest.getEventId());
-        comment.setCreatedAt(LocalDateTime.now()); // Set creation time automatically
+        comment.setCreatedAt(LocalDateTime.now());
         comment.setLikeCount(0);
         comment.setDislikeCount(0);
         
@@ -52,7 +50,6 @@ public class CommentResource {
         return Response.status(Response.Status.CREATED).entity(savedComment).build();
     }
 
-    // Get comments for an event (for event detail page)
     @GET
     @Path("/event/{eventId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -66,7 +63,6 @@ public class CommentResource {
         return Response.ok(comments).build();
     }
 
-    // Get comments for an event with pagination
     @GET
     @Path("/event/{eventId}/paginated")
     @Produces(MediaType.APPLICATION_JSON)
@@ -90,7 +86,6 @@ public class CommentResource {
         return Response.ok(response).build();
     }
 
-    // Like/dislike comments with session tracking (for public platform)
     @POST
     @Path("/{id}/like")
     @Produces(MediaType.APPLICATION_JSON)
@@ -111,15 +106,12 @@ public class CommentResource {
         Map<String, Object> response = new HashMap<>();
         
         if (Boolean.TRUE.equals(hasLiked)) {
-            // Unlike - remove like
             this.commentService.decrementLikes(commentId);
             session.removeAttribute(likedKey);
             response.put("message", "Like removed from comment");
             response.put("action", "unliked");
         } else {
-            // Add like
             if (Boolean.TRUE.equals(hasDisliked)) {
-                // Remove dislike first
                 this.commentService.decrementDislikes(commentId);
                 session.removeAttribute(dislikedKey);
             }
@@ -129,7 +121,6 @@ public class CommentResource {
             response.put("action", "liked");
         }
         
-        // Get updated comment with current counts
         Comment updatedComment = this.commentService.findComment(commentId);
         response.put("hasLiked", session.getAttribute(likedKey) != null);
         response.put("hasDisliked", session.getAttribute(dislikedKey) != null);
@@ -159,15 +150,12 @@ public class CommentResource {
         Map<String, Object> response = new HashMap<>();
         
         if (Boolean.TRUE.equals(hasDisliked)) {
-            // Remove dislike
             this.commentService.decrementDislikes(commentId);
             session.removeAttribute(dislikedKey);
             response.put("message", "Dislike removed from comment");
             response.put("action", "undisliked");
         } else {
-            // Add dislike
             if (Boolean.TRUE.equals(hasLiked)) {
-                // Remove like first
                 this.commentService.decrementLikes(commentId);
                 session.removeAttribute(likedKey);
             }
@@ -177,7 +165,6 @@ public class CommentResource {
             response.put("action", "disliked");
         }
         
-        // Get updated comment with current counts
         Comment updatedComment = this.commentService.findComment(commentId);
         response.put("hasLiked", session.getAttribute(likedKey) != null);
         response.put("hasDisliked", session.getAttribute(dislikedKey) != null);

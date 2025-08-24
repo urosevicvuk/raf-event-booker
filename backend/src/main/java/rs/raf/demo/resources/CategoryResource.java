@@ -28,7 +28,6 @@ public class CategoryResource {
         return this.categoryService.allCategories();
     }
 
-    // Paginated categories endpoint
     @GET
     @Path("/paginated")
     @Produces(MediaType.APPLICATION_JSON)
@@ -37,14 +36,13 @@ public class CategoryResource {
         try {
             List<Category> allCategories = this.categoryService.allCategories();
             
-            // Calculate pagination
             int total = allCategories.size();
             int offset = (page - 1) * limit;
             int endIndex = Math.min(offset + limit, total);
             
             List<Category> paginatedCategories;
             if (offset >= total) {
-                paginatedCategories = List.of(); // Empty list if page is beyond available data
+                paginatedCategories = List.of();
             } else {
                 paginatedCategories = allCategories.subList(offset, endIndex);
             }
@@ -102,7 +100,6 @@ public class CategoryResource {
         }
 
         try {
-            // Check for duplicate name (excluding current category)
             Category existingCategory = this.categoryService.findCategoryByName(category.getName());
             if (existingCategory != null && !existingCategory.getId().equals(id)) {
                 Map<String, String> response = new HashMap<>();
@@ -130,7 +127,6 @@ public class CategoryResource {
             return Response.status(Response.Status.NOT_FOUND).entity(response).build();
         }
 
-        // Check if category has events (should not be deletable if it has events)
         if (this.categoryService.hasEvents(id)) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Cannot delete category with existing events");
@@ -149,7 +145,6 @@ public class CategoryResource {
         }
     }
 
-    // Get events by category (needed by frontend CategoryPage)
     @GET
     @Path("/{id}/events")
     @Produces(MediaType.APPLICATION_JSON)
@@ -166,7 +161,6 @@ public class CategoryResource {
         try {
             int offset = (page - 1) * limit;
             List<Event> events = this.eventService.findEventsByCategoryPaginated(categoryId, offset, limit);
-            // Populate events with their tags
             events = this.eventService.populateEventsWithTags(events);
             
             Map<String, Object> response = new HashMap<>();

@@ -5,13 +5,12 @@ const API_BASE_URL = 'http://localhost:8081/api';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true, // CRITICAL FIX: Send cookies for session management
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor to add JWT token
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -25,14 +24,12 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle authentication errors
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
   (error: AxiosError) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
@@ -41,13 +38,11 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-// Utility function to extract data from paginated responses
 export const extractResponseData = <T>(response: PaginatedResponse<T>): T[] => {
   return response.items || response.events || response.users || 
          response.categories || response.comments || [];
 };
 
-// Enhanced error handling utility
 export const handleApiError = (error: any, userMessage?: string): string => {
   console.error('API Error:', error);
   const message = userMessage || 

@@ -2,7 +2,6 @@ import axiosInstance from './api';
 import type {Event, PaginatedResponse, SearchResponse, EventFormData, InteractionResponse} from '../types';
 
 export class EventService {
-  // Basic CRUD operations
   static async getAllEvents(): Promise<Event[]> {
     const response = await axiosInstance.get<Event[]>('/events');
     return response.data;
@@ -34,7 +33,6 @@ export class EventService {
     await axiosInstance.delete(`/events/${id}`);
   }
 
-  // Search and filtering
   static async searchEvents(
     searchTerm: string, 
     page: number = 1, 
@@ -73,7 +71,6 @@ export class EventService {
     return response.data;
   }
 
-  // Public platform endpoints
   static async getLatestEvents(limit: number = 10): Promise<Event[]> {
     const response = await axiosInstance.get<Event[]>('/events/latest', {
       params: { limit }
@@ -114,7 +111,6 @@ export class EventService {
     return response.data;
   }
 
-  // Interactions
   static async incrementView(eventId: number): Promise<{ message: string }> {
     const response = await axiosInstance.post(`/events/${eventId}/view`);
     return response.data;
@@ -130,11 +126,9 @@ export class EventService {
     return response.data;
   }
 
-  // RSVP
   static async getRSVPCount(eventId: number): Promise<{ eventId: number; currentRSVPCount: number }> {
     const response = await axiosInstance.get(`/events/${eventId}/rsvp-count`);
     return response.data;
   }
 }
 
-// Removed default export for consistency

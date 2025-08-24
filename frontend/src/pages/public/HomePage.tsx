@@ -10,10 +10,8 @@ const HomePage: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  // Actual counts for display
   const [totalEventCount, setTotalEventCount] = useState(0);
   const [totalCategoryCount, setTotalCategoryCount] = useState(0);
-  // Category pagination
   const [currentCategoryPage, setCurrentCategoryPage] = useState(0);
   const categoriesPerPage = 4;
 
@@ -25,15 +23,15 @@ const HomePage: React.FC = () => {
     try {
       setLoading(true);
       const [eventsData, categoriesData, eventCount] = await Promise.all([
-        EventService.getLatestEvents(10), // Show 10 most recent events
+        EventService.getLatestEvents(10),
         CategoryService.getAllCategories(),
-        EventService.getEventCount() // Get actual total count
+        EventService.getEventCount()
       ]);
       
       setEvents(eventsData);
-      setCategories(categoriesData); // Store all categories for pagination
-      setTotalEventCount(eventCount.count); // Set actual total event count
-      setTotalCategoryCount(categoriesData.length); // Set actual total category count
+      setCategories(categoriesData);
+      setTotalEventCount(eventCount.count);
+      setTotalCategoryCount(categoriesData.length);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -45,7 +43,6 @@ const HomePage: React.FC = () => {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   };
 
-  // Category pagination functions
   const totalCategoryPages = Math.ceil(categories.length / categoriesPerPage);
   const currentCategories = categories.slice(
     currentCategoryPage * categoriesPerPage,
@@ -62,7 +59,6 @@ const HomePage: React.FC = () => {
 
   return (
     <PublicLayout showSidebar={false}>
-      {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
           <h1 className="hero-title">
@@ -97,7 +93,6 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Categories Section */}
       {categories.length > 0 && (
         <section className="section">
           <div className="section-header">
@@ -106,7 +101,6 @@ const HomePage: React.FC = () => {
           </div>
           
           <div className="categories-pagination-container">
-            {/* Left Arrow */}
             <button
               onClick={handlePrevCategories}
               disabled={currentCategoryPage === 0}
@@ -119,7 +113,6 @@ const HomePage: React.FC = () => {
               &#8249;
             </button>
 
-            {/* Categories Row */}
             <div className="categories-row">
               {currentCategories.map((category, index) => (
                 <Link
@@ -135,7 +128,6 @@ const HomePage: React.FC = () => {
               ))}
             </div>
 
-            {/* Right Arrow */}
             <button
               onClick={handleNextCategories}
               disabled={currentCategoryPage >= totalCategoryPages - 1}
@@ -149,7 +141,6 @@ const HomePage: React.FC = () => {
             </button>
           </div>
 
-          {/* Category pagination indicator */}
           {totalCategoryPages > 1 && (
             <div className="category-pagination-dots">
               {Array.from({ length: totalCategoryPages }, (_, i) => (
@@ -164,7 +155,6 @@ const HomePage: React.FC = () => {
         </section>
       )}
 
-      {/* Latest Events Section */}
       <section className="section">
         <div className="section-header">
           <h2>Latest Events</h2>

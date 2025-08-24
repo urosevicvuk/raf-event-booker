@@ -38,7 +38,7 @@ const EventForm: React.FC<EventFormProps> = ({
       setFormData({
         title: event.title,
         description: event.description,
-        eventDate: event.eventDate.replace('Z', '').slice(0, 16), // Format for datetime-local input
+        eventDate: event.eventDate.replace('Z', '').slice(0, 16),
         location: event.location,
         categoryId: event.categoryId,
         tags: event.tags ? event.tags.map(tag => tag.name).join(', ') : '',
@@ -72,7 +72,6 @@ const EventForm: React.FC<EventFormProps> = ({
       [name]: processedValue
     }));
 
-    // Clear error when user starts typing
     if (errors[name as keyof EventFormData]) {
       setErrors(prev => ({
         ...prev,

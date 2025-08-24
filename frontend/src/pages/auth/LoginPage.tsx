@@ -17,14 +17,12 @@ const LoginPage: React.FC = () => {
 
   const from = (location.state as any)?.from?.pathname || '/ems';
 
-  // Redirect if already authenticated
   React.useEffect(() => {
     if (!authLoading && isAuthenticated) {
       navigate(from, { replace: true });
     }
   }, [authLoading, isAuthenticated, navigate, from]);
 
-  // Show loading while checking authentication
   if (authLoading) {
     return (
       <div className="login-container">

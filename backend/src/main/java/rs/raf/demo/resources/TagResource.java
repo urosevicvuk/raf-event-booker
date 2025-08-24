@@ -22,7 +22,6 @@ public class TagResource {
     @Inject
     private EventService eventService;
 
-    // Basic CRUD for EMS
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<Tag> all() {
@@ -37,7 +36,6 @@ public class TagResource {
         return Response.status(Response.Status.CREATED).entity(savedTag).build();
     }
 
-    // Get tag by ID (needed by frontend TagPage)
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -51,7 +49,6 @@ public class TagResource {
         return Response.ok(tag).build();
     }
 
-    // Get events by tag (needed by frontend TagPage)
     @GET
     @Path("/{id}/events")
     @Produces(MediaType.APPLICATION_JSON)
@@ -83,7 +80,6 @@ public class TagResource {
         }
     }
 
-    // Get tags for an event (for event detail page)
     @GET
     @Path("/event/{eventId}")
     @Produces(MediaType.APPLICATION_JSON)

@@ -45,7 +45,6 @@ public class TagService {
     }
 
     public List<Tag> getTagsForEvent(Integer eventId) {
-        // Use the existing repository method that handles the JOIN
         return this.tagRepository.findTagsByEventId(eventId);
     }
 
@@ -63,7 +62,6 @@ public class TagService {
             if (!cleanTagName.isEmpty()) {
                 Tag existingTag = this.findTagByName(cleanTagName);
                 if (existingTag == null) {
-                    // Create new tag
                     Tag newTag = new Tag();
                     newTag.setName(cleanTagName);
                     existingTag = this.addTag(newTag);
@@ -76,10 +74,8 @@ public class TagService {
     }
 
     public void assignTagsToEvent(Integer eventId, List<Tag> tags) {
-        // First remove all existing tags for this event
         this.eventTagRepository.removeAllTagsForEvent(eventId);
         
-        // Then add the new tags
         for (Tag tag : tags) {
             this.eventTagRepository.addEventTag(eventId, tag.getId());
         }

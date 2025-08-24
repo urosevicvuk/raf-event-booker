@@ -34,4 +34,3 @@ export class CategoryService {
   }
 }
 
-// Removed default export for consistency

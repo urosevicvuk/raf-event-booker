@@ -3,14 +3,14 @@ import type {RSVP} from '../types';
 
 export class RSVPService {
   static async registerForEvent(eventId: number, userIdentifier: string): Promise<{ message: string }> {
-    // Generate current timestamp in the format backend expects: "YYYY-MM-DD HH:mm:ss"
+    // Kreiranje timestamp-a u potrebnom formatu
     const now = new Date();
     const registrationDate = now.toISOString().slice(0, 19).replace('T', ' ');
     
     const response = await axiosInstance.post(`/rsvp`, {
       eventId,
       userIdentifier,
-      registrationDate // CRITICAL FIX: Include required field
+      registrationDate
     });
     return response.data;
   }
