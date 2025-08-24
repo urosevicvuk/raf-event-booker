@@ -99,6 +99,18 @@ public class AuthFilter implements ContainerRequestFilter {
             }
             
             if (matchedResource instanceof EventResource) {
+                // Allow public access to interaction endpoints
+                if (path.contains("/view") || path.contains("/like") || path.contains("/dislike")) {
+                    return false;
+                }
+                return method.equals("POST") || method.equals("PUT") || method.equals("DELETE");
+            }
+            
+            if (matchedResource instanceof CommentResource) {
+                // Allow public access to comment interaction endpoints
+                if (path.contains("/like") || path.contains("/dislike")) {
+                    return false;
+                }
                 return method.equals("POST") || method.equals("PUT") || method.equals("DELETE");
             }
             
